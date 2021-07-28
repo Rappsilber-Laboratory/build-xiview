@@ -58,7 +58,6 @@
     "jquery": "~3.6.0",
     "d3": "~3.5.5",
     "jsonview": "~1.2.0",
-    "spin.js": "~4.1.0",
     "underscore": "^1.13.1",
     "colorbrewer": "~1.3.0",
     "split.js": "~re1.6.4",
