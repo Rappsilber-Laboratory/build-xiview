@@ -61,7 +61,8 @@
     "jquery": "~3.6.0",
     "jsonview": "~1.2.0",
     "split.js": "~1.6.4",
-    "underscore": "^1.13.1"
+    "underscore": "^1.13.1",
+    "spin": "^0.0.1"
   },
   "keywords": [
     "crosslinking",
