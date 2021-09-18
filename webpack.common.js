@@ -25,7 +25,7 @@ module.exports = {
     module: {
         rules: [
             {
-                test: /\.css$/i,
+                test: /\.(css|scss)$/i,
                 use: ["style-loader", "css-loader"],
             },
             {
@@ -41,5 +41,15 @@ module.exports = {
         contentBase: path.join(__dirname),
         compress: true,
         port: 9000
-    }
+    },
+    plugins: [
+        // not working because has outdated webpack dependency
+        /* Use the ProvidePlugin constructor to inject jquery implicit globals */
+        // new webpack.ProvidePlugin({
+        //     $: "jquery",
+        //     jQuery: "jquery",
+        //     "window.jQuery": "jquery'",
+        //     "window.$": "jquery"
+        // })
+    ]
 };
