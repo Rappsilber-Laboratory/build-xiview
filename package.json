@@ -30,7 +30,7 @@
     "url": "git@github.com:Rappsilber-Laboratory/xiVIEW_container.git"
   },
   "bugs": {
-    "url": "https://github.com/Rappsilber-Laboratory/xiVIEW_container"
+    "url": "https://github.com/Rappsilber-Laboratory/xiVIEW_container/issues"
   },
   "devDependencies": {
     "@babel/core": "^7.14.6",
