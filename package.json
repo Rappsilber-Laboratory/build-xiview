@@ -54,15 +54,12 @@
   },
   "dependencies": {
     "core-js": "~3.14.0",
-
     "jquery": "~3.4.1",
     "jsonview": "~1.2.0",
     "webpack-jquery-ui": "~2.0.1",
     "datatables.net": "~1.11.2",
     "datatables.net-dt": "~1.11.2",
-
     "d3": "~3.5.5",
-
     "underscore": "^1.13.1",
     "backbone": "~1.4.0",
     "split.js": "~1.6.4",
