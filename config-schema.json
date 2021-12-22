@@ -1,0 +1,168 @@
+{
+    "type": "object",
+    "required": [],
+    "properties": {
+        "conservative_n_multi_loss": {
+            "type": "number"
+        },
+        "crosslinker": {
+            "type": "string"
+        },
+        "denoise_alpha": {
+            "type": "object",
+            "required": [],
+            "properties": {
+                "bin_size": {
+                    "type": "number"
+                },
+                "top_n": {
+                    "type": "number"
+                }
+            }
+        },
+        "denoise_alpha_beta": {
+            "type": "object",
+            "required": [],
+            "properties": {
+                "bin_size": {
+                    "type": "number"
+                },
+                "top_n": {
+                    "type": "number"
+                }
+            }
+        },
+        "digestion": {
+            "type": "object",
+            "required": [],
+            "properties": {
+                "enzymes": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "min_peptide_length": {
+                    "type": "number"
+                },
+                "missed_cleavages": {
+                    "type": "number"
+                }
+            }
+        },
+        "fragmentation": {
+            "type": "object",
+            "required": [],
+            "properties": {
+                "add_precursor": {
+                    "type": "boolean"
+                },
+                "cterm_ions": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "losses": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "required": [],
+                        "properties": {
+                            "composition": {
+                                "type": "string"
+                            },
+                            "mass": {
+                                "type": "number"
+                            },
+                            "name": {
+                                "type": "string"
+                            },
+                            "specificity": {
+                                "type": "array",
+                                "items": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                },
+                "match_missing_monoisotopic": {
+                    "type": "boolean"
+                },
+                "max_nloss": {
+                    "type": "number"
+                },
+                "nterm_ions": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "isotope_error_ximpa": {
+            "type": "number"
+        },
+        "modification": {
+            "type": "object",
+            "required": [],
+            "properties": {
+                "max_modified_peps": {
+                    "type": "number"
+                },
+                "max_var_protein_mods": {
+                    "type": "number"
+                },
+                "modifications": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "required": [],
+                        "properties": {
+                            "composition": {
+                                "type": "string"
+                            },
+                            "name": {
+                                "type": "string"
+                            },
+                            "specificity": {
+                                "type": "array",
+                                "items": {
+                                    "type": "string"
+                                }
+                            },
+                            "type": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "ms1_tol": {
+            "type": "string"
+        },
+        "ms2_tol": {
+            "type": "string"
+        },
+        "re_scan_number": {
+            "type": "string"
+        },
+        "reporting_requirements": {
+            "type": "object",
+            "required": [],
+            "properties": {
+                "report_top_ranking_only": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "top_n_alpha_beta_scores": {
+            "type": "number"
+        },
+        "top_n_alpha_scores": {
+            "type": "number"
+        }
+    }
+}
