@@ -53,7 +53,7 @@
     "lint:fix": "eslint CLMS-model/src crosslink-viewer/src xi3/js --fix"
   },
   "engines": {
-    "node": ">=14.0.0"
+    "node": ">=16.13.2"
   },
   "dependencies": {
     "core-js": "~3.14.0",
