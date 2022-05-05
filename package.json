@@ -9,7 +9,7 @@
   "contributors": [
     {
       "name": "Martin Graham",
-      "email": ""
+      "email": "M.Graham@napier.ac.uk"
     },
     {
       "name": "Colin Combe",
@@ -17,11 +17,11 @@
     },
     {
       "name": "Lars Kolbowski",
-      "email": ""
+      "email": "lars.kolbowski@tu-berlin.de"
     },
     {
       "name": "Lutz Fischer",
-      "email": ""
+      "email": "lutz.fischer@tu-berlin.de"
     }
   ],
   "license": "GPL-3.0-or-later",
@@ -30,7 +30,7 @@
     "url": "git@github.com:Rappsilber-Laboratory/xiVIEW_container.git"
   },
   "bugs": {
-    "url": "https://github.com/Rappsilber-Laboratory/xiVIEW_container"
+    "url": "https://github.com/Rappsilber-Laboratory/xiVIEW_container/issues"
   },
   "devDependencies": {
     "@babel/core": "^7.14.6",
@@ -43,26 +43,26 @@
     "url-loader": "^4.1.1",
     "webpack": "^4.46.0",
     "webpack-cli": "^3.3.11",
-    "webpack-merge": "^4.2.2"
+    "webpack-merge": "^4.2.2",
+    "qunit": "^2.17.2"
   },
   "scripts": {
     "build-dev": "webpack -d --mode development --config webpack.dev.js",
-    "build-prod": "rm dist/*; webpack -p --mode production --config webpack.prod.js"
+    "build-prod": "rm dist/*; webpack -p --mode production --config webpack.prod.js",
+    "lint": "eslint CLMS-model/src crosslink-viewer/src xi3/js",
+    "lint:fix": "eslint CLMS-model/src crosslink-viewer/src xi3/js --fix"
   },
   "engines": {
     "node": ">=14.0.0"
   },
   "dependencies": {
     "core-js": "~3.14.0",
-
     "jquery": "~3.4.1",
     "jsonview": "~1.2.0",
     "webpack-jquery-ui": "~2.0.1",
     "datatables.net": "~1.11.2",
     "datatables.net-dt": "~1.11.2",
-
     "d3": "~3.5.5",
-
     "underscore": "^1.13.1",
     "backbone": "~1.4.0",
     "split.js": "~1.6.4",

@@ -1,1 +1,3 @@
-/src/js/cola.js
+./crosslink-viewer/vendor/cola.js
+./xi3/vendor/*
+./xi3/js/align/bioseq32.js
