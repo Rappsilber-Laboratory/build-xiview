@@ -19,12 +19,6 @@
 [submodule "history"]
 	path = history
 	url = https://github.com/Rappsilber-Laboratory/history.git
-[submodule "userGUI"]
-	path = userGUI
-	url = https://github.com/Rappsilber-Laboratory/userGUI.git
-[submodule "vendor"]
-	path = vendor
-	url = https://github.com/Rappsilber-Laboratory/vendor.git
 [submodule "xidocs"]
 	path = xidocs
 	url = https://github.com/Rappsilber-Laboratory/xidocs.git
