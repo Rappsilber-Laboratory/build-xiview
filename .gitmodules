@@ -25,3 +25,6 @@
 [submodule "searchSubmit"]
 	path = searchSubmit
 	url = https://github.com/Rappsilber-Laboratory/searchSubmit
+[submodule "xi2_xiview_loader"]
+	path = xi2_xiview_loader
+	url = https://github.com/Rappsilber-Laboratory/xi2_xiview_loader
