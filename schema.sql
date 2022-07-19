@@ -203,7 +203,7 @@ ALTER TABLE public.spectrumidentification OWNER TO xiadmin;
 CREATE TABLE public.spectrumidentificationprotocol (
     upload_id bigint NOT NULL,
     frag_tol text NOT NULL,
-    ions json,
+    search_params json,
     analysis_software json,
     id text NOT NULL
 );
