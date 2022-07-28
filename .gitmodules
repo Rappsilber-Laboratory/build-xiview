@@ -10,21 +10,9 @@
 [submodule "crosslink-viewer"]
 	path = crosslink-viewer
 	url = https://github.com/Rappsilber-Laboratory/crosslink-viewer.git
-[submodule "history"]
-	path = history
-	url = https://github.com/Rappsilber-Laboratory/history.git
-[submodule "userGUI"]
-	path = userGUI
-	url = https://github.com/Rappsilber-Laboratory/userGUI.git
-[submodule "vendor"]
-	path = vendor
-	url = https://github.com/Rappsilber-Laboratory/vendor.git
 [submodule "xidocs"]
 	path = xidocs
 	url = https://github.com/Rappsilber-Laboratory/xidocs.git
-[submodule "searchSubmit"]
-	path = searchSubmit
-	url = https://github.com/Rappsilber-Laboratory/searchSubmit
 [submodule "xi2_xiview_loader"]
 	path = xi2_xiview_loader
 	url = https://github.com/Rappsilber-Laboratory/xi2_xiview_loader
