@@ -1,6 +1,3 @@
-[submodule "xiNET_website"]
-	path = xiNET_website
-	url = https://github.com/Rappsilber-Laboratory/xiSPEC_website.git
 [submodule "CLMS-UI"]
 	path = xi3
 	url = https://github.com/Rappsilber-Laboratory/xiView.git
@@ -16,9 +13,9 @@
 [submodule "crosslink-viewer"]
 	path = crosslink-viewer
 	url = https://github.com/Rappsilber-Laboratory/crosslink-viewer.git
-[submodule "history"]
-	path = history
-	url = https://github.com/Rappsilber-Laboratory/history.git
 [submodule "xidocs"]
 	path = xidocs
 	url = https://github.com/Rappsilber-Laboratory/xidocs.git
+[submodule "xi2_xiview_loader"]
+	path = xi2_xiview_loader
+	url = https://github.com/Rappsilber-Laboratory/xi2_xiview_loader.git

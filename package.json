@@ -48,7 +48,7 @@
   },
   "scripts": {
     "build-dev": "webpack -d --mode development --config webpack.dev.js",
-    "build-prod": "rm dist/*; webpack -p --mode production --config webpack.prod.js",
+    "build-prod": "webpack -p --mode production --config webpack.prod.js",
     "lint": "eslint CLMS-model/src crosslink-viewer/src xi3/js",
     "lint:fix": "eslint CLMS-model/src crosslink-viewer/src xi3/js --fix"
   },

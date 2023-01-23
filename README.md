@@ -4,62 +4,97 @@ brings together several projects from Rappsilber Laboratory to provide a search 
 
 # Installation Instructions
 
+## 1. Install Prerequisites
 
-## 1. Pre-requisites: Apache, PostgreSQL, PHP postgres module, Git
+- postgresql - i'm using v13.9 
+- python 3.10
+- java 8 for annotator - i'm using openjdk 1.8.0
 
-If running the server on Windows then the easiest way to get Apache and Php setup is to install [XAMPP](https://www.apachefriends.org/download.html).
+## 2. create a postgresql role and database to use
+
+```
+sudo su postgres
+psql
+create database xiview;
+create user xiadmin with login password 'your_password_here';
+grant all privileges on database xiview to xiadmin;
+```
+
+find the hba.conf file in the postgresql installation directory and add a line to allow  the xiadmin role to access the database:
+e.g. 
+```
+sudo nano /etc/postgresql/13/main/pg_hba.conf
+```
+then add the line:
+`local   xiview   xiadmin   md5`
+
+then restart postgresql:
+```
+sudo service postgresql restart
+```
+
+## 3. Checkout out this github project ('pride' branch), initialising submodules
+ 
+```
+git clone https://github.com/Rappsilber-Laboratory/xiView_container.git
+cd xiView_container
+git checkout pride
+git submodule update --init --recursive`
+```
 
 
-## 2. Enable PHP postgres modules
+## 4. Configure the python environment for the file parser
 
-to enable the postgres php module add following to php.ini:
-extension=pgsql.so
+edit the file xiSPEC_ms_parser/credentials.py to point to your postgressql database.
+e.g. so its content is:
+```
+hostname = 'localhost'
+username = 'xiadmin'
+password = 'your_password_here'
+database = 'xiview'
+port = 5432
+```
 
-https://help.guebs.eu/how-to-enable-postgresql-extension-for-php/
+Set up the python environment:
 
-alternatively, use a2enmod  https://stackoverflow.com/questions/35988990/how-to-enable-php7-module-in-apache
+```
+cd xiSPEC_ms_parser
+pipenv install --python 3.10
+```
 
-easiest way to test is probably to call phpinfo() in php and search output for "pgsql", it should appear under loaded modules
+run create_db_schema.py to create the database tables:
+```
+python create_db_schema.py
+```
 
+parse a test dataset:
+```
+python process_dataset.py -p PXD038060
+```
 
-## 3. Checkout out this github project, initialising submodules
+hopefully that works... it will fetch files from ftp site and store them in a temp directory, then process them 
 
-From the document root of your webserver
-      
-`git clone --recurse-submodules https://github.com/Rappsilber-Laboratory/xiView_container.git
-`
+## 5. Start the flask server for the web visualisation
 
-## 4. Create xiVIEW database and database user
+Set up the python environment:
+```
+cd ../xi2_xiview_loader
+pipenv install --python 3.10
+```
 
-Initialise the database by running the schema.sql script from this project
+Start the flask web server:
+```
+python -m flask run
+```
 
-## 5. Configure the python environment for the file parser
-
-Follow the instructions at [https://github.com/Rappsilber-Laboratory/xiSPEC_ms_parser](https://github.com/Rappsilber-Laboratory/xiSPEC_ms_parser) but you don't need to install sqlite; instead you need to edit the file xiSPEC_ms_parser/credentials.py to point to your postgress database.
+Then open a browser and go to http://127.0.0.1:5000, you should be able to navigate to processed datasets and see the results.
 
 ## 6. Install xiAnnotator
 
-Follow the instructions at  https://github.com/Rappsilber-Laboratory/xiAnnotator/tree/master/doc/SysV
+*displaying the annotated spectra is currently broken*
 
-Connecting to the annotator from the javascript running in the browser requires you to do some stuff setting up a proxy to it.
-I think you will need the apache proxy_http & headers modules installed.
+when it's fixed you may just need to start the annotator: 
+`./start_annotator.sh`
 
-You will need something like this in the apache config for the host:
-'''<Location "/xiAnnotator">
-   ProxyPass http://localhost:8083/xiAnnotator
-   ProxyPassReverse http://localhost:8083/xiAnnotator
-   Header add "Access-Control-Allow-Origin" "*"
-</Location>  
-'''
+(also instructions at  https://github.com/Rappsilber-Laboratory/xiAnnotator/tree/master/doc/SysV)
 
-## 7. Edit yet more config files (todo - tidy this up)
-
-Edit ./connectionString.php so it points to your PostgreSQL database
-Edit ./xiSPEC_config.php so it points to your xiAnnotator service
-
-.gitignore will ignore your changes to these files
-
-Copy the xi_ini directory in this project into the project parent directory
-cp ./xi_ini ../xi_ini
-Edit ../xi_ini/emailInfo.php to contain the information needed for user registration, this is (i) your google recaptcha secret key, and (ii) the email account details.
-The email account is used to send confirmation emails and password reset requests.

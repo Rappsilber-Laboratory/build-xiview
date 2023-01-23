@@ -17,7 +17,7 @@ module.exports = {
     },
     output: {
         filename: '[name].js',
-        path: __dirname + '/dist',
+        path: __dirname + '/xi2_xiview_loader/static',
         library: ['[name]'],
         libraryTarget: "umd"
     },
