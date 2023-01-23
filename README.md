@@ -76,6 +76,17 @@ hopefully that works... it will fetch files from ftp site and store them in a te
 
 ## 5. Start the flask server for the web visualisation
 
+edit the file xi2_xiview_loader/database.ini to point to your postgressql database.
+e.g. so its content is:
+```
+[postgresql]
+host=localhost	
+database=xiview
+user=xiadmin
+password=your_password_here
+port=5432
+```
+
 Set up the python environment:
 ```
 cd ../xi2_xiview_loader
