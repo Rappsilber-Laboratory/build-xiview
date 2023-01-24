@@ -39,7 +39,7 @@ sudo service postgresql restart
 git clone https://github.com/Rappsilber-Laboratory/xiView_container.git
 cd xiView_container
 git checkout pride
-git submodule update --init --recursive`
+git submodule update --init --recursive
 ```
 
 
