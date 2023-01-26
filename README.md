@@ -95,7 +95,7 @@ pipenv install --python 3.10
 
 Start the flask web server:
 ```
-python -m flask run
+pipenv run python -m flask run
 ```
 
 Then open a browser and go to http://127.0.0.1:5000, you should be able to navigate to processed datasets and see the results.
