@@ -1,0 +1,9 @@
+[Unit]
+Description=xiAnnotator
+[Service]
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=xiAnnotator
+ExecStart=/usr/bin/java  -DBASE_URI=http://0.0.0.0:8083/xiAnnotator/ -Djava.util.logging.loglevel:org.rappsilber=ERROR -jar /usr/local/xiAnnotator/xiAnnotator.jar
+[Install]
+WantedBy=multi-user.target

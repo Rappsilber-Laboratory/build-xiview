@@ -1,0 +1,4 @@
+<IfModule mod_rewrite.c>
+RewriteEngine On
+RedirectMatch 301 ^/xiVIEW/$ https://www.rappsilberlab.org/xiVIEW/userGUI/userLogin.html
+#deny from all
