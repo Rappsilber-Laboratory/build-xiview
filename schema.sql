@@ -2,8 +2,8 @@
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 9.6.20
--- Dumped by pg_dump version 9.6.20
+-- Dumped from database version 13.9 (Debian 13.9-0+deb11u1)
+-- Dumped by pg_dump version 13.9 (Debian 13.9-0+deb11u1)
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -17,21 +17,7 @@ SET client_min_messages = warning;
 SET row_security = off;
 
 --
--- Name: plpgsql; Type: EXTENSION; Schema: -; Owner: 
---
-
-CREATE EXTENSION IF NOT EXISTS plpgsql WITH SCHEMA pg_catalog;
-
-
---
--- Name: EXTENSION plpgsql; Type: COMMENT; Schema: -; Owner: 
---
-
-COMMENT ON EXTENSION plpgsql IS 'PL/pgSQL procedural language';
-
-
---
--- Name: make_uid(); Type: FUNCTION; Schema: public; Owner: col
+-- Name: make_uid(); Type: FUNCTION; Schema: public; Owner: xiadmin
 --
 
 CREATE FUNCTION public.make_uid() RETURNS text
@@ -47,14 +33,14 @@ END;
 $$;
 
 
-ALTER FUNCTION public.make_uid() OWNER TO col;
+ALTER FUNCTION public.make_uid() OWNER TO xiadmin;
 
 SET default_tablespace = '';
 
-SET default_with_oids = false;
+SET default_table_access_method = heap;
 
 --
--- Name: db_sequences; Type: TABLE; Schema: public; Owner: col
+-- Name: db_sequences; Type: TABLE; Schema: public; Owner: xiadmin
 --
 
 CREATE TABLE public.db_sequences (
@@ -68,10 +54,10 @@ CREATE TABLE public.db_sequences (
 );
 
 
-ALTER TABLE public.db_sequences OWNER TO col;
+ALTER TABLE public.db_sequences OWNER TO xiadmin;
 
 --
--- Name: layouts; Type: TABLE; Schema: public; Owner: col
+-- Name: layouts; Type: TABLE; Schema: public; Owner: xiadmin
 --
 
 CREATE TABLE public.layouts (
@@ -83,10 +69,10 @@ CREATE TABLE public.layouts (
 );
 
 
-ALTER TABLE public.layouts OWNER TO col;
+ALTER TABLE public.layouts OWNER TO xiadmin;
 
 --
--- Name: modifications; Type: TABLE; Schema: public; Owner: col
+-- Name: modifications; Type: TABLE; Schema: public; Owner: xiadmin
 --
 
 CREATE TABLE public.modifications (
@@ -99,10 +85,10 @@ CREATE TABLE public.modifications (
 );
 
 
-ALTER TABLE public.modifications OWNER TO col;
+ALTER TABLE public.modifications OWNER TO xiadmin;
 
 --
--- Name: peptide_evidences; Type: TABLE; Schema: public; Owner: col
+-- Name: peptide_evidences; Type: TABLE; Schema: public; Owner: xiadmin
 --
 
 CREATE TABLE public.peptide_evidences (
@@ -115,10 +101,10 @@ CREATE TABLE public.peptide_evidences (
 );
 
 
-ALTER TABLE public.peptide_evidences OWNER TO col;
+ALTER TABLE public.peptide_evidences OWNER TO xiadmin;
 
 --
--- Name: peptides; Type: TABLE; Schema: public; Owner: col
+-- Name: peptides; Type: TABLE; Schema: public; Owner: xiadmin
 --
 
 CREATE TABLE public.peptides (
@@ -131,10 +117,10 @@ CREATE TABLE public.peptides (
 );
 
 
-ALTER TABLE public.peptides OWNER TO col;
+ALTER TABLE public.peptides OWNER TO xiadmin;
 
 --
--- Name: spectra; Type: TABLE; Schema: public; Owner: col
+-- Name: spectra; Type: TABLE; Schema: public; Owner: xiadmin
 --
 
 CREATE TABLE public.spectra (
@@ -151,10 +137,10 @@ CREATE TABLE public.spectra (
 );
 
 
-ALTER TABLE public.spectra OWNER TO col;
+ALTER TABLE public.spectra OWNER TO xiadmin;
 
 --
--- Name: spectrum_identifications; Type: TABLE; Schema: public; Owner: col
+-- Name: spectrum_identifications; Type: TABLE; Schema: public; Owner: xiadmin
 --
 
 CREATE TABLE public.spectrum_identifications (
@@ -176,16 +162,16 @@ CREATE TABLE public.spectrum_identifications (
 );
 
 
-ALTER TABLE public.spectrum_identifications OWNER TO col;
+ALTER TABLE public.spectrum_identifications OWNER TO xiadmin;
 
 --
--- Name: uploads; Type: TABLE; Schema: public; Owner: col
+-- Name: upload; Type: TABLE; Schema: public; Owner: xiadmin
 --
 
-CREATE TABLE public.uploads (
+CREATE TABLE public.upload (
     id integer NOT NULL,
     user_id integer,
-    filename text,
+    identification_file_name text,
     peak_list_file_names json,
     analysis_software json,
     provider json,
@@ -210,10 +196,10 @@ CREATE TABLE public.uploads (
 );
 
 
-ALTER TABLE public.uploads OWNER TO col;
+ALTER TABLE public.upload OWNER TO xiadmin;
 
 --
--- Name: uploads_id_seq; Type: SEQUENCE; Schema: public; Owner: col
+-- Name: uploads_id_seq; Type: SEQUENCE; Schema: public; Owner: xiadmin
 --
 
 CREATE SEQUENCE public.uploads_id_seq
@@ -224,50 +210,35 @@ CREATE SEQUENCE public.uploads_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.uploads_id_seq OWNER TO col;
+ALTER TABLE public.uploads_id_seq OWNER TO xiadmin;
 
 --
--- Name: uploads_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: col
+-- Name: uploads_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: xiadmin
 --
 
-ALTER SEQUENCE public.uploads_id_seq OWNED BY public.uploads.id;
+ALTER SEQUENCE public.uploads_id_seq OWNED BY public.upload.id;
 
 
 --
--- Name: user_in_group; Type: TABLE; Schema: public; Owner: col
+-- Name: useraccount; Type: TABLE; Schema: public; Owner: xiadmin
 --
 
-CREATE TABLE public.user_in_group (
-    user_id integer,
-    group_id integer
-);
-
-
-ALTER TABLE public.user_in_group OWNER TO col;
-
---
--- Name: users; Type: TABLE; Schema: public; Owner: col
---
-
-CREATE TABLE public.users (
+CREATE TABLE public.useraccount (
     user_name character varying,
     password character varying,
     email character varying,
-    max_aas integer,
-    max_spectra integer,
     gdpr_token character varying,
     id integer NOT NULL,
     ptoken character varying,
-    hidden boolean,
     ptoken_timestamp timestamp without time zone,
     gdpr_timestamp timestamp without time zone
 );
 
 
-ALTER TABLE public.users OWNER TO col;
+ALTER TABLE public.useraccount OWNER TO xiadmin;
 
 --
--- Name: users_id_seq; Type: SEQUENCE; Schema: public; Owner: col
+-- Name: users_id_seq; Type: SEQUENCE; Schema: public; Owner: xiadmin
 --
 
 CREATE SEQUENCE public.users_id_seq
@@ -278,31 +249,31 @@ CREATE SEQUENCE public.users_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.users_id_seq OWNER TO col;
+ALTER TABLE public.users_id_seq OWNER TO xiadmin;
 
 --
--- Name: users_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: col
+-- Name: users_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: xiadmin
 --
 
-ALTER SEQUENCE public.users_id_seq OWNED BY public.users.id;
-
-
---
--- Name: uploads id; Type: DEFAULT; Schema: public; Owner: col
---
-
-ALTER TABLE ONLY public.uploads ALTER COLUMN id SET DEFAULT nextval('public.uploads_id_seq'::regclass);
+ALTER SEQUENCE public.users_id_seq OWNED BY public.useraccount.id;
 
 
 --
--- Name: users id; Type: DEFAULT; Schema: public; Owner: col
+-- Name: upload id; Type: DEFAULT; Schema: public; Owner: xiadmin
 --
 
-ALTER TABLE ONLY public.users ALTER COLUMN id SET DEFAULT nextval('public.users_id_seq'::regclass);
+ALTER TABLE ONLY public.upload ALTER COLUMN id SET DEFAULT nextval('public.uploads_id_seq'::regclass);
 
 
 --
--- Name: layouts layouts_pkey; Type: CONSTRAINT; Schema: public; Owner: col
+-- Name: useraccount id; Type: DEFAULT; Schema: public; Owner: xiadmin
+--
+
+ALTER TABLE ONLY public.useraccount ALTER COLUMN id SET DEFAULT nextval('public.users_id_seq'::regclass);
+
+
+--
+-- Name: layouts layouts_pkey; Type: CONSTRAINT; Schema: public; Owner: xiadmin
 --
 
 ALTER TABLE ONLY public.layouts
@@ -310,36 +281,36 @@ ALTER TABLE ONLY public.layouts
 
 
 --
--- Name: uploads uploads_pkey; Type: CONSTRAINT; Schema: public; Owner: col
+-- Name: upload uploads_pkey; Type: CONSTRAINT; Schema: public; Owner: xiadmin
 --
 
-ALTER TABLE ONLY public.uploads
+ALTER TABLE ONLY public.upload
     ADD CONSTRAINT uploads_pkey PRIMARY KEY (id);
 
 
 --
--- Name: peptide_evidences_upload_id_idx; Type: INDEX; Schema: public; Owner: col
+-- Name: peptide_evidences_upload_id_idx; Type: INDEX; Schema: public; Owner: xiadmin
 --
 
 CREATE INDEX peptide_evidences_upload_id_idx ON public.peptide_evidences USING btree (upload_id);
 
 
 --
--- Name: peptides_upload_id_idx; Type: INDEX; Schema: public; Owner: col
+-- Name: peptides_upload_id_idx; Type: INDEX; Schema: public; Owner: xiadmin
 --
 
 CREATE INDEX peptides_upload_id_idx ON public.peptides USING btree (upload_id);
 
 
 --
--- Name: spectra_upload_id_idx; Type: INDEX; Schema: public; Owner: col
+-- Name: spectra_upload_id_idx; Type: INDEX; Schema: public; Owner: xiadmin
 --
 
 CREATE INDEX spectra_upload_id_idx ON public.spectra USING btree (upload_id);
 
 
 --
--- Name: spectrum_identifications_upload_id_idx; Type: INDEX; Schema: public; Owner: col
+-- Name: spectrum_identifications_upload_id_idx; Type: INDEX; Schema: public; Owner: xiadmin
 --
 
 CREATE INDEX spectrum_identifications_upload_id_idx ON public.spectrum_identifications USING btree (upload_id);
