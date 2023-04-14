@@ -289,6 +289,13 @@ ALTER TABLE ONLY public.upload
 
 
 --
+-- Name: db_sequences_upload_id_idx; Type: INDEX; Schema: public; Owner: xiadmin
+--
+
+CREATE INDEX db_sequences_upload_id_idx ON public.db_sequences USING btree (upload_id);
+
+
+--
 -- Name: peptide_evidences_upload_id_idx; Type: INDEX; Schema: public; Owner: xiadmin
 --
 
