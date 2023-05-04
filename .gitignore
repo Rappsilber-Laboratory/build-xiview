@@ -1,8 +1,11 @@
+xiviewConfig.php
 connectionString.php
 xiSpecConfig.php
 XiDBConfig.conf
 xi_ini/*
-
+uploads/
+uploads
+phpinfo.php
 .idea/
 .idea
 package-lock.json
