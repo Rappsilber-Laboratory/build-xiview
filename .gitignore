@@ -2,6 +2,7 @@ connectionString.php
 xiSpecConfig.php
 XiDBConfig.conf
 xi_ini/*
+dist/xiview.js.map
 
 .idea/
 .idea
