@@ -1,3 +1,9 @@
+/*
+object-assign
+(c) Sindre Sorhus
+@license MIT
+*/
+
 /* @license C3.js v0.4.23 | (c) C3 Team and other contributors | http://c3js.org/ */
 
 /*!
@@ -9,6 +15,13 @@
  * https://js.foundation/
  *
  * Date: 2019-04-08
+ */
+
+/*!
+ * The buffer module from node.js, for the browser.
+ *
+ * @author   Feross Aboukhadijeh <feross@feross.org> <http://feross.org>
+ * @license  MIT
  */
 
 /*!
@@ -583,3 +596,5 @@
    * Author: Miller Medeiros
    * Version: 1.0.0 - Build: 268 (2012/11/29 05:48 PM)
    */
+
+//!XI2 !XI1

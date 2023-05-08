@@ -3,6 +3,7 @@
   "version": "0.0.0",
   "description": "visualisation of crosslinking  mass spectrometry data",
   "keywords": [
+    "xiVIEW",
     "crosslinking",
     "mass spectrometry",
     "protein",
@@ -40,7 +41,7 @@
   ],
   "main": "./xi3/js/main.js",
   "scripts": {
-    "build-dev": "webpack --mode development --config webpack.dev.js",
+    "build-dev": "rm dist/*; webpack --mode development --config webpack.dev.js",
     "build-prod": "rm dist/*; webpack --mode production --config webpack.prod.js",
     "lint": "eslint CLMS-model/src crosslink-viewer/src xi3/js"
   },
@@ -52,11 +53,11 @@
     "d3": "~3.5.5",
     "datatables.net": "~1.11.2",
     "datatables.net-dt": "~1.11.2",
-    "jquery": "~3.4.1",
+    "jquery": "~3.6.0",
     "jsonview": "~1.2.0",
-    "spin": "^0.0.1",
+    "spin": "~0.0.1",
     "split.js": "~1.6.4",
-    "underscore": "^1.13.1",
+    "underscore": "~1.13.1",
     "webpack-jquery-ui": "~2.0.1"
   },
   "devDependencies": {
@@ -74,6 +75,6 @@
     "webpack-merge": "^5.8.0"
   },
   "engines": {
-    "node": ">=14.0.0"
+    "node": ">=16.13.2"
   }
 }
