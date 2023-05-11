@@ -3,22 +3,16 @@ const path = require("path");
 
 
 module.exports = {
-    // entry: "./xi3/js/main.js",
-    // output: {
-    //     path: path.resolve(__dirname, "dist"),
-    //     filename: "xiview.js",
-    //     library: ["xiview"],
-    //     libraryTarget: "umd"
-    // },
-
     entry: {
-        xiview: './xi3/js/main.js',
+        xiview: "./xi3/js/main.js",
         // aligner: './xi3/js/align/alignWorker.js',
+        // website: "./xiNET_website/js/website.js",
+        // xiviewhistory: "./history/js/history.js",
     },
     output: {
-        filename: '[name].js',
-        path: __dirname + '/dist',
-        library: ['[name]'],
+        filename: "[name].js",
+        path: __dirname + "/dist",
+        library: ["[name]"],
         libraryTarget: "umd"
     },
 
@@ -37,10 +31,18 @@ module.exports = {
             }
         ]
     },
-    devServer: {
-        contentBase: path.join(__dirname),
-        compress: true,
-        port: 9000
+    optimization: {
+        splitChunks: {
+            // include all types of chunks
+            // chunks: 'all',
+            cacheGroups: {
+                commons: {
+                    name: 'commons',
+                    chunks: 'initial',
+                    minChunks: 2,
+                },
+            },
+        },
     },
     plugins: [
         // not working because has outdated webpack dependency

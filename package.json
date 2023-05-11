@@ -41,8 +41,8 @@
   ],
   "main": "./xi3/js/main.js",
   "scripts": {
-    "build-dev": "rm dist/*; webpack --mode development --config webpack.dev.js",
-    "build-prod": "rm dist/*; webpack --mode production --config webpack.prod.js",
+    "build-dev": "rm xiNET_website/dist/*; webpack --mode development --config webpack.dev.js",
+    "build-prod": "rm xiNET_website/dist/*; webpack --mode production --config webpack.prod.js",
     "lint": "eslint CLMS-model/src crosslink-viewer/src xi3/js"
   },
   "dependencies": {
