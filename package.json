@@ -2,6 +2,21 @@
   "name": "xiview",
   "version": "0.0.0",
   "description": "visualisation of crosslinking  mass spectrometry data",
+  "keywords": [
+    "xiVIEW",
+    "crosslinking",
+    "mass spectrometry",
+    "protein",
+    "interactions"
+  ],
+  "bugs": {
+    "url": "https://github.com/Rappsilber-Laboratory/xiVIEW_container/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:Rappsilber-Laboratory/xiVIEW_container.git"
+  },
+  "license": "GPL-3.0-or-later",
   "author": {
     "name": "Colin Combe",
     "email": "colin.combe@ed.ac.uk"
@@ -24,13 +39,27 @@
       "email": "lutz.fischer@tu-berlin.de"
     }
   ],
-  "license": "GPL-3.0-or-later",
-  "repository": {
-    "type": "git",
-    "url": "git@github.com:Rappsilber-Laboratory/xiVIEW_container.git"
+  "main": "./xi3/js/main.js",
+  "scripts": {
+    "build-dev": "webpack --mode development --config webpack.dev.js",
+    "build-prod": "webpack --mode production --config webpack.prod.js",
+    "dev-server": "pwd; cd xi2_xiview_loader; pipenv run python -m flask run;",
+    "lint": "eslint CLMS-model/src crosslink-viewer/src xi3/js"
   },
-  "bugs": {
-    "url": "https://github.com/Rappsilber-Laboratory/xiVIEW_container/issues"
+  "dependencies": {
+    "@eastdesire/jscolor": "~2.4.6",
+    "backbone": "~1.4.0",
+    "colorbrewer": "~1.3.0",
+    "core-js": "~3.14.0",
+    "d3": "~3.5.5",
+    "datatables.net": "~1.11.2",
+    "datatables.net-dt": "~1.11.2",
+    "jquery": "~3.6.0",
+    "jsonview": "~1.2.0",
+    "spin": "~0.0.1",
+    "split.js": "~1.6.4",
+    "underscore": "~1.13.1",
+    "webpack-jquery-ui": "~2.0.1"
   },
   "devDependencies": {
     "@babel/core": "^7.21.5",
@@ -46,34 +75,7 @@
     "webpack-cli": "^5.0.2",
     "webpack-merge": "^5.8.0"
   },
-  "scripts": {
-    "build-dev": "webpack --mode development --config webpack.dev.js",
-    "build-prod": "webpack --mode production --config webpack.prod.js",
-    "lint": "eslint CLMS-model/src crosslink-viewer/src xi3/js"
-  },
   "engines": {
-    "node": ">=14.0.0"
-  },
-  "dependencies": {
-    "@eastdesire/jscolor": "~2.4.6",
-    "backbone": "~1.4.0",
-    "colorbrewer": "~1.3.0",
-    "core-js": "~3.14.0",
-    "d3": "~3.5.5",
-    "datatables.net": "~1.11.2",
-    "datatables.net-dt": "~1.11.2",
-    "jquery": "^3.6.0",
-    "jsonview": "~1.2.0",
-    "spin": "^0.0.1",
-    "split.js": "~1.6.4",
-    "underscore": "^1.13.1",
-    "webpack-jquery-ui": "~2.0.1"
-  },
-  "keywords": [
-    "crosslinking",
-    "mass spectrometry",
-    "protein",
-    "interactions"
-  ],
-  "main": "./xi3/js/main.js"
+    "node": ">=16.13.2"
+  }
 }
