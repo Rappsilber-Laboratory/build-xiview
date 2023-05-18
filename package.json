@@ -53,7 +53,7 @@
     "d3": "~3.5.5",
     "datatables.net": "~1.11.2",
     "datatables.net-dt": "~1.11.2",
-    "jquery": "~3.6.0",
+    "jquery": "~3.4.1",
     "jsonview": "~1.2.0",
     "spin": "~0.0.1",
     "split.js": "~1.6.4",
