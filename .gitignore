@@ -1,6 +1,7 @@
 xiviewConfig.php
 connectionString.php
 xiSpecConfig.php
+XiDBConfig.conf
 xi_ini/*
 uploads/
 uploads
