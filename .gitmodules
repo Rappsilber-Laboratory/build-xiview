@@ -14,5 +14,5 @@
 	path = xidocs
 	url = https://github.com/Rappsilber-Laboratory/xidocs.git
 [submodule "xi2_xiview_loader"]
-	path = xi2_xiview_loader
+	path = xi-web-api
 	url = https://github.com/Rappsilber-Laboratory/xi2_xiview_loader
