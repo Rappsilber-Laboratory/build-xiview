@@ -8,7 +8,6 @@ brings together several projects from Rappsilber Laboratory to provide a search 
 
 - postgresql - i'm using v13.9 
 - python 3.10
-- java 8 for annotator - i'm using openjdk 1.8.0
 
 ## 2. create a postgresql role and database to use
 
@@ -99,13 +98,4 @@ pipenv run python -m flask run
 ```
 
 Then open a browser and go to http://127.0.0.1:5000, you should be able to navigate to processed datasets and see the results.
-
-## 6. Install xiAnnotator
-
-*displaying the annotated spectra is currently broken*
-
-when it's fixed you may just need to start the annotator: 
-`./start_annotator.sh`
-
-(also instructions at  https://github.com/Rappsilber-Laboratory/xiAnnotator/tree/master/doc/SysV)
 
