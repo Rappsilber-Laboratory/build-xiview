@@ -13,6 +13,6 @@
 [submodule "xidocs"]
 	path = xidocs
 	url = https://github.com/Rappsilber-Laboratory/xidocs.git
-[submodule "xi2_xiview_loader"]
+[submodule "xi-web-api"]
 	path = xi-web-api
-	url = https://github.com/Rappsilber-Laboratory/xi2_xiview_loader
+	url = https://github.com/Rappsilber-Laboratory/xi-web-api.git

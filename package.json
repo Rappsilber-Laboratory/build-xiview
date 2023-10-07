@@ -59,7 +59,7 @@
     "spin": "~0.0.1",
     "split.js": "~1.6.4",
     "underscore": "~1.13.1",
-    "webpack-jquery-ui": "~2.0.1"
+    "webpack-jquery-ui": "^2.0.1"
   },
   "devDependencies": {
     "@babel/core": "^7.21.5",
@@ -76,6 +76,6 @@
     "webpack-merge": "^5.8.0"
   },
   "engines": {
-    "node": ">=16.13.2"
+    "node": "20.8.0"
   }
 }
