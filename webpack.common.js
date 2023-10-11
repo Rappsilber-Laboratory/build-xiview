@@ -6,7 +6,7 @@ module.exports = {
     entry: {
         xiview: "./xi3/js/main.js",
         // aligner: './xi3/js/align/alignWorker.js',
-        // website: "./xiNET_website/js/website.js",
+        website: "./xiNET_website/js/website.js",
         // xiviewhistory: "./history/js/history.js",
     },
     output: {
