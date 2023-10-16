@@ -4,10 +4,7 @@ const path = require("path");
 
 module.exports = {
     entry: {
-        xiview: "./xi3/js/main.js",
-        // aligner: './xi3/js/align/alignWorker.js',
-        website: "./xiNET_website/js/website.js",
-        // xiviewhistory: "./history/js/history.js",
+        xiview: "./xiview/js/main.js",
     },
     output: {
         filename: "[name].js",
