@@ -1,3 +1,5 @@
+dist/*
+
 xiviewConfig.php
 connectionString.php
 xiSpecConfig.php
