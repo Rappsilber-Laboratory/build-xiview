@@ -1,7 +1,7 @@
 # xiVIEW_container
 
 uses git submodules to bring together the JavaScript subproject that make xiVIEW 
-along with the configuration scripts for the build tools (npm and webpack)
+along with the configuration files for the build tools (npm and webpack)
 
 
 ## To checkout out this github project, initialising submodules
