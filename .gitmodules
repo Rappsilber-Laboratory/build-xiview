@@ -1,6 +1,6 @@
-[submodule "CLMS-UI"]
+[submodule "xiview"]
 	path = xiview
-	url = https://github.com/Rappsilber-Laboratory/xiView.git
+	url = https://github.com/Rappsilber-Laboratory/xiview.git
 [submodule "CLMS-model"]
 	path = CLMS-model
 	url = https://github.com/Rappsilber-Laboratory/CLMS-model.git
@@ -10,9 +10,3 @@
 [submodule "crosslink-viewer"]
 	path = crosslink-viewer
 	url = https://github.com/Rappsilber-Laboratory/crosslink-viewer.git
-[submodule "userGUI"]
-	path = userGUI
-	url = https://github.com/Rappsilber-Laboratory/userGUI.git
-[submodule "vendor"]
-	path = vendor
-	url = https://github.com/Rappsilber-Laboratory/vendor.git
