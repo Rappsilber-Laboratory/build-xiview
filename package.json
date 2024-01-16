@@ -41,8 +41,8 @@
   ],
   "main": "./xiview/js/main.js",
   "scripts": {
-    "build-dev": "webpack --mode development --config webpack.dev.js; cp dist/xiview.js ../xiview-server/static/xiview.js;",
-    "build-prod": "webpack --mode production --config webpack.prod.js; cp dist/xiview.js ../xiview-server/static/xiview.js;",
+    "build-dev": "webpack --mode development --config webpack.dev.js; cp dist/xiview.js ../xiview_org/dist/xiview.js;",
+    "build-prod": "webpack --mode production --config webpack.prod.js; cp dist/xiview.js ../xiview_org/dist/xiview.js;",
     "lint": "eslint CLMS-model/src crosslink-viewer/src xiview/js"
   },
   "dependencies": {
