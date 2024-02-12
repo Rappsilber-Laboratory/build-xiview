@@ -67,7 +67,7 @@
     "css-loader": "^5.2.7",
     "eslint": "^8.39.0",
     "file-loader": "^6.2.0",
-    "qunit": "^2.19.4",
+    "qunit": "2.20.0",
     "style-loader": "^3.3.2",
     "url-loader": "^4.1.1",
     "webpack": "^5.81.0",
