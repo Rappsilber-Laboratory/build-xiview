@@ -41,8 +41,11 @@
   ],
   "main": "./xiview/js/main.js",
   "scripts": {
-    "build-dev": "webpack --mode development --config webpack.dev.js; cp dist/xiview.js ../xiview_org/dist/xiview.js;",
-    "build-prod": "webpack --mode production --config webpack.prod.js; cp dist/xiview.js ../xiview_org/dist/xiview.js;",
+    "build-dev": "webpack --mode development --config webpack.dev.js;",
+    "build-prod": "webpack --mode production --config webpack.prod.js;",
+    "build-dev-and-copy-to-xiview_org": "webpack --mode development --config webpack.dev.js; cp dist/xiview.js ../xiview_org/dist/xiview.js;",
+    "build-dev-and-copy-to-xi2": "webpack --mode development --config webpack.dev.js; cp dist/xiview.js ../xiview-server_xi2/static/xiview.js;",
+    "build-prod-and-copy-to-xi2": "webpack --mode production --config webpack.dev.js; cp dist/xiview.js ../xiview-server_xi2/static/xiview.js;",
     "lint": "eslint CLMS-model/src crosslink-viewer/src xiview/js"
   },
   "dependencies": {
@@ -53,7 +56,7 @@
     "d3": "~3.5.5",
     "datatables.net": "~1.11.2",
     "datatables.net-dt": "~1.11.2",
-    "jquery": "~3.4.1",
+    "jquery": "~3.7.1",
     "jsonview": "~1.2.0",
     "spin": "~0.0.1",
     "split.js": "~1.6.4",
