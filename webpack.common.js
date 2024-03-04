@@ -10,7 +10,7 @@ module.exports = {
         filename: "[name].js",
         path: __dirname + "/dist",
         library: ["[name]"],
-        libraryTarget: "umd"
+        libraryTarget: "umd",
     },
 
     module: {
@@ -34,8 +34,8 @@ module.exports = {
             // chunks: 'all',
             cacheGroups: {
                 commons: {
-                    name: 'commons',
-                    chunks: 'initial',
+                    name: "commons",
+                    chunks: "initial",
                     minChunks: 2,
                 },
             },
