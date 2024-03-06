@@ -1,6 +1,6 @@
 {
   "name": "xiview",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "description": "visualisation of crosslinking  mass spectrometry data",
   "keywords": [
     "xiVIEW",
@@ -10,7 +10,7 @@
     "interactions"
   ],
   "bugs": {
-    "url": "https://github.com/Rappsilber-Laboratory/xiVIEW_container/issues"
+    "url": "https://github.com/Rappsilber-Laboratory/build-xiview/issues"
   },
   "repository": {
     "type": "git",
@@ -43,19 +43,22 @@
   "scripts": {
     "build-dev": "webpack --mode development --config webpack.dev.js;",
     "build-prod": "webpack --mode production --config webpack.prod.js;",
+    "build-dev-and-copy-to-pride": "webpack --mode development --config webpack.dev.js; cp dist/xiview.js ../xiview-server/static/xiview.js;",
+    "build-prod-and-copy-to-pride": "webpack --mode production --config webpack.prod.js; cp dist/xiview.js ../xiview-server/static/xiview.js;",
     "build-dev-and-copy-to-xiview_org": "webpack --mode development --config webpack.dev.js; cp dist/xiview.js ../xiview_org/dist/xiview.js;",
+    "build-prod-and-copy-to-xiview_org": "webpack --mode production --config webpack.prod.js; cp dist/xiview.js ../xiview_org/dist/xiview.js;",
     "build-dev-and-copy-to-xi2": "webpack --mode development --config webpack.dev.js; cp dist/xiview.js ../xiview-server_xi2/static/xiview.js;",
     "build-prod-and-copy-to-xi2": "webpack --mode production --config webpack.prod.js; cp dist/xiview.js ../xiview-server_xi2/static/xiview.js;",
     "lint": "eslint CLMS-model/src crosslink-viewer/src xiview/js"
   },
   "dependencies": {
-    "@eastdesire/jscolor": "~2.4.6",
-    "backbone": "~1.4.0",
+    "@eastdesire/jscolor": "~2.5.2",
+    "backbone": "~1.6.0",
     "colorbrewer": "~1.3.0",
-    "core-js": "~3.14.0",
-    "d3": "~3.5.5",
-    "datatables.net": "~1.11.2",
-    "datatables.net-dt": "~1.11.2",
+    "core-js": "~3.36.0",
+    "d3": "~3.5.17",
+    "datatables.net": "~2.0.0",
+    "datatables.net-dt": "~1.13.10",
     "jquery": "~3.7.1",
     "jsonview": "~1.2.0",
     "spin": "~0.0.1",
