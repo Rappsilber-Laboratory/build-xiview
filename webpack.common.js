@@ -10,7 +10,8 @@ module.exports = {
         filename: "[name].js",
         path: __dirname + "/dist",
         library: ["[name]"],
-        libraryTarget: "umd",
+        libraryTarget: "umd" ,
+        globalObject: "this"
     },
 
     module: {
@@ -28,19 +29,19 @@ module.exports = {
             }
         ]
     },
-    optimization: {
-        splitChunks: {
-            // include all types of chunks
-            // chunks: 'all',
-            cacheGroups: {
-                commons: {
-                    name: "commons",
-                    chunks: "initial",
-                    minChunks: 2,
-                },
-            },
-        },
-    },
+    // optimization: {
+    //     splitChunks: {
+    //         // include all types of chunks
+    //         // chunks: 'all',
+    //         cacheGroups: {
+    //             commons: {
+    //                 name: "commons",
+    //                 chunks: "initial",
+    //                 minChunks: 2,
+    //             },
+    //         },
+    //     },
+    // },
     plugins: [
         // not working because has outdated webpack dependency
         /* Use the ProvidePlugin constructor to inject jquery implicit globals */
