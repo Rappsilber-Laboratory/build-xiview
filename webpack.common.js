@@ -1,6 +1,5 @@
-require("webpack");
+const webpack = require("webpack");
 const path = require("path");
-
 
 module.exports = {
     entry: {
@@ -8,9 +7,9 @@ module.exports = {
     },
     output: {
         filename: "[name].js",
-        path: __dirname + "/dist",
-        library: ["[name]"],
-        libraryTarget: "umd" ,
+        path: path.resolve(__dirname, "dist"),
+        library: "[name]",
+        libraryTarget: "umd",
         globalObject: "this"
     },
 
@@ -23,33 +22,30 @@ module.exports = {
             {
                 test: /\.(png|jpe?g|gif|svg|eot|ttf|woff|woff2)$/i,
                 loader: "url-loader",
-                // options: {
-                //     limit: 8192,
-                // },
+                options: {
+                    limit: 8192,
+                },
             }
         ]
     },
-    // optimization: {
-    //     splitChunks: {
-    //         // include all types of chunks
-    //         // chunks: 'all',
-    //         cacheGroups: {
-    //             commons: {
-    //                 name: "commons",
-    //                 chunks: "initial",
-    //                 minChunks: 2,
-    //             },
-    //         },
-    //     },
-    // },
+    optimization: {
+        splitChunks: {
+            chunks: "all",
+            cacheGroups: {
+                commons: {
+                    name: "commons",
+                    chunks: "initial",
+                    minChunks: 2,
+                },
+            },
+        },
+    },
     plugins: [
-        // not working because has outdated webpack dependency
-        /* Use the ProvidePlugin constructor to inject jquery implicit globals */
-        // new webpack.ProvidePlugin({
-        //     $: "jquery",
-        //     jQuery: "jquery",
-        //     "window.jQuery": "jquery'",
-        //     "window.$": "jquery"
-        // })
+        new webpack.ProvidePlugin({
+            $: "jquery",
+            jQuery: "jquery",
+            "window.jQuery": "jquery",
+            "window.$": "jquery"
+        })
     ]
 };
