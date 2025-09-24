@@ -10,12 +10,14 @@ xiVIEW is a web-based visualization tool for cross-linking mass spectrometry dat
 
 This is a container repository that uses git submodules to organize four main components:
 
-- **xiview/**: Main application code with UI components, views, and application logic
-- **CLMS-model/**: Core data model for cross-linking mass spectrometry data
-- **crosslink-viewer/**: xiNET crosslink network visualization component
-- **spectrum/**: xiSPEC spectrum viewer component
+- **xiview/**: Main application code with UI components, views, and application logic (branch: v2)
+- **CLMS-model/**: Core data model for cross-linking mass spectrometry data (branch: v2)
+- **crosslink-viewer/**: xiNET crosslink network visualization component (branch: master)
+- **spectrum/**: xiSPEC spectrum viewer component (branch: dev)
 
 The entry point is `xiview/js/promises-load.js` which loads CSS, initializes the spinner, imports core modules, and handles data fetching.
+
+Each submodule has its own CLAUDE.md file with component-specific information and development guidance.
 
 Key directories:
 - `xiview/js/views/`: UI view components
@@ -73,3 +75,7 @@ git clone --recurse-submodules https://github.com/Rappsilber-Laboratory/build_xi
 ```
 
 The submodules point to separate repositories for each component, allowing independent development while maintaining a unified build process.
+#- crosslink and crosslinking are not hyphenated
+- we're not updating from d3 v3
+- don't try to change anything in node_modules
+- no changes, no linting and no checking the formatting of code inside directories named "vendor"

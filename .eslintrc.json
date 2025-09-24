@@ -8,7 +8,6 @@
     "brace-style": "warn",
     "no-unused-vars": "warn",
     "indent": ["error", 4]
-//    "object-curly-newline": ["error", "always"]
   },
   "env": {
     "es6": true,

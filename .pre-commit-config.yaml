@@ -1,0 +1,47 @@
+# Pre-commit configuration for xiVIEW main repository
+repos:
+  # Standard pre-commit hooks for general file hygiene
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.4.0
+    hooks:
+      - id: trailing-whitespace
+        exclude: 'vendor/'
+      - id: end-of-file-fixer
+        exclude: 'vendor/'
+      - id: check-yaml
+      - id: check-json
+        exclude: 'vendor/'
+      - id: check-added-large-files
+        args: [ '--maxkb=1000' ]
+      - id: check-case-conflict
+      - id: check-merge-conflict
+      - id: mixed-line-ending
+        args: [ '--fix=lf' ]
+        exclude: 'vendor/'
+
+  # NPM linting with autofix
+  - repo: local
+    hooks:
+      - id: npm-lint-fix
+        name: npm lint with autofix
+        entry: npm run lint
+        language: system
+        pass_filenames: false
+        files: '\.(js|jsx)$'
+        exclude: '(vendor/|node_modules/)'
+
+  # Custom webpack build validation
+  - repo: local
+    hooks:
+      - id: webpack-build-check
+        name: webpack build validation
+        entry: npm run build-dev
+        language: system
+        pass_filenames: false
+        files: '\.(js|css|json)$'
+        exclude: '(vendor/|node_modules/|dist/)'
+
+
+# Global configuration
+default_stages: [ commit ]
+fail_fast: false
