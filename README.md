@@ -52,11 +52,36 @@ npm run build-prod
 
 ```
 
-### Code Quality
+### Code Quality & Testing
 ```bash
 # Run ESLint
 npm run lint
+
+# Run automated tests (builds first, then tests)
+npm test
+
+# Run tests without building (requires prior build)
+npm run test-headless
 ```
+
+### Testing Infrastructure
+
+xiVIEW includes comprehensive automated testing using QUnit and Puppeteer:
+
+- **Test Location**: `xiview/tests/` directory
+- **Test Files**: `qunit.html`, `qunit2.html` (browser), `tests.js`, `tests2.js` (logic)
+- **Test Data**: JSON test datasets (`10003.json`, `15884.json`, `blosums.json`)
+- **Execution**: Headless browser testing via Puppeteer with local HTTP server
+- **Coverage**: 67 tests covering data parsing, filtering, selection, scoring, alignment, distance calculations, and CSV export
+
+The test runner automatically:
+1. Starts a local HTTP server to serve test files
+2. Launches headless Chrome to execute QUnit tests
+3. Reports detailed results with pass/fail counts and timing
+
+**Commands**:
+- `npm test`: Builds project then runs headless tests (safe for clean runs)
+- `npm run test-headless`: Runs tests directly (assumes project already built)
 
 ## Submodule Management
 

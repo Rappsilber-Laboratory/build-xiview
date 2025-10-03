@@ -47,92 +47,22 @@ npm run lint
 ```
 
 ### Testing
-Tests are located in `xiview/tests/` directory. No specific test runner is configured in package.json - examine the test files to understand the testing approach.
+Comprehensive automated testing infrastructure with QUnit and Puppeteer:
+```bash
+# From build-xiview root
+npm test               # Full test suite with build
+npm run test-headless  # Headless browser testing (assumes built)
+npm run lint           # Code quality checks
+```
 
-## Test Infrastructure Update Plan
+**Test Infrastructure (Modernized)**:
+- **Framework**: QUnit 2.21.1 with Puppeteer headless execution
+- **Test Files**: `xiview/tests/qunit.html`, `qunit2.html`, `tests.js`, `tests2.js`
+- **Coverage**: 67 comprehensive tests covering core functionality
+- **Data Loading**: Local HTTP server resolves JSON loading issues in headless environment
+- **CI Integration**: Added to pre-commit hooks for automated validation
+- **Result Reporting**: Detailed pass/fail counts with execution timing
 
-**Current State Issues:**
-- QUnit JavaScript is commented out in HTML files, making tests non-functional
-- Outdated QUnit version (2.20.0)
-- No automated test runner - manual browser testing only
-- Missing test infrastructure in submodules (CLMS-model, crosslink-viewer, spectrum)
-- Tests depend on built bundle, complicating debugging
-- No CI/CD integration
-
-### Phase 1: Fix Immediate Broken Tests (Priority: High)
-
-1. **Restore QUnit Functionality**
-   - Uncomment QUnit script in `xiview/tests/qunit.html` and `qunit2.html`
-   - Update QUnit to latest stable version (2.21+)
-   - Fix test execution to make tests runnable again
-
-2. **Add npm Test Scripts**
-   - Add test runner script to main package.json
-   - Implement headless browser testing (Puppeteer/Playwright)
-   - Create `npm test` command for automated execution
-
-### Phase 2: Modernize Test Framework (Priority: High)
-
-3. **Upgrade Testing Stack**
-   - Migrate from browser-based to Node.js test runner
-   - Implement Jest or Vitest for better development experience
-   - Add test coverage reporting
-   - Setup test debugging capabilities
-
-4. **Restructure Test Organization**
-   - Separate unit tests from integration tests
-   - Create test utilities and helpers
-   - Implement proper test data management
-   - Add test mocks for external dependencies
-
-### Phase 3: Expand Test Coverage (Priority: Medium)
-
-5. **Component-Level Testing**
-   - Add tests for individual modules (views, models, filters)
-   - Test webpack build process
-   - Add visual regression testing for UI components
-   - Test cross-module integration
-
-6. **Submodule Test Implementation**
-   - **CLMS-model**: Add unit tests for core data models
-   - **crosslink-viewer**: Add tests for network visualization
-   - **spectrum**: Add tests for spectrum rendering
-   - Coordinate testing across submodule boundaries
-
-### Phase 4: Advanced Testing Features (Priority: Medium)
-
-7. **End-to-End Testing**
-   - Implement Cypress or Playwright for E2E tests
-   - Test complete user workflows
-   - Add performance testing
-   - Test data loading and visualization pipelines
-
-8. **Development Workflow Integration**
-   - Pre-commit hooks for test execution
-   - Watch mode for development
-   - Parallel test execution
-   - Test result reporting and notifications
-
-### Phase 5: CI/CD and Quality Assurance (Priority: Low)
-
-9. **Continuous Integration**
-   - GitHub Actions workflow for automated testing
-   - Test matrix across different environments
-   - Automated test reporting and badges
-   - Integration with code coverage services
-
-10. **Quality Gates**
-    - Minimum test coverage requirements
-    - Performance regression detection
-    - Cross-browser compatibility testing
-    - Automated dependency vulnerability scanning
-
-**Implementation Timeline:**
-- Quick Wins (1-2 days): Fix QUnit, add npm test command
-- Foundation Work (1 week): Modern test runner, restructure organization
-- Comprehensive Coverage (2-3 weeks): Component testing, submodule tests, E2E
-- Advanced Features (1-2 weeks): CI/CD integration, performance testing
-- **Total Estimated Effort**: 4-6 weeks for complete modernization
 
 ## Build System
 
@@ -164,4 +94,5 @@ The submodules point to separate repositories for each component, allowing indep
 - we're not updating from d3 v3
 - don't try to change anything in node_modules
 - no changes, no linting and no checking the formatting of code inside directories named "vendor"
-- BEFORE RUNNING ANY BASH COMMAND ALWAYS CHECK THE PRESENT WORKING DIRECTORY AND ENSURE YOU ARE IN THE DIRECTORY YOU BELIEVE YOU ARE IN
+- BEFORE RUNNING ANY BASH COMMAND ALWAYS CHECK THE PRESENT WORKING DIRECTORY AND ADJUST COMMANDS ACCORDINGLY
+- DO NOT ADD QUNIT IMPORT TO HTML FILES (its include in the development bundle)

@@ -41,6 +41,17 @@ repos:
         files: '\.(js|css|json)$'
         exclude: '(vendor/|node_modules/|dist/)'
 
+  # Run automated tests
+  - repo: local
+    hooks:
+      - id: npm-test
+        name: run npm tests
+        entry: npm run test-headless
+        language: system
+        pass_filenames: false
+        files: '\.(js|json)$'
+        exclude: '(vendor/|node_modules/|dist/)'
+
 
 # Global configuration
 default_stages: [ commit ]
