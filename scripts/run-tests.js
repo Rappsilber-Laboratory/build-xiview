@@ -206,7 +206,16 @@ async function runTestInBrowser(testName, testHtmlFile) {
         }
 
         // Determine which test function to run based on the test file
-        const testFunction = testName.includes('Tests 1') ? 'test' : 'test2';
+        let testFunction;
+        if (testName.includes('Tests 1')) {
+            testFunction = 'test';
+        } else if (testName.includes('Tests 2')) {
+            testFunction = 'test2';
+        } else if (testName.includes('CLMS-model')) {
+            testFunction = 'testClmsModel';
+        } else {
+            testFunction = 'test'; // fallback
+        }
 
         // Manually trigger the test function
         console.log(`🚀 Triggering XIVIEW_TEST.${testFunction}()...`);
@@ -266,7 +275,8 @@ async function runTests() {
 
     const testSuites = [
         { name: 'QUnit Tests 1', htmlFile: 'xiview/tests/qunit.html' },
-        { name: 'QUnit Tests 2', htmlFile: 'xiview/tests/qunit2.html' }
+        { name: 'QUnit Tests 2', htmlFile: 'xiview/tests/qunit2.html' },
+        { name: 'CLMS-model Tests', htmlFile: 'CLMS-model/tests/qunit-clms-model.html' }
     ];
 
     let allResults = [];
