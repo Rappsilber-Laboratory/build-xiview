@@ -46,7 +46,7 @@
     "build-dev-and-copy-to-xiview-server": "npm run build-dev; cp dist/* ../xiview-server/static/ ;",
     "build-prod-and-copy-to-xiview-server": "npm run build-prob; cp dist/xiview.js ../xiview-server/static/xiview.js;",
     "lint": "eslint CLMS-model/src crosslink-viewer/js xiview/js spectrum/src",
-    "test": "npm run build-dev && npm run test-headless",
+    "test": "npm run test-headless",
     "test-headless": "node scripts/run-tests.js"
   },
   "dependencies": {

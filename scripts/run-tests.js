@@ -9,6 +9,7 @@ const { URL } = require('url');
 // Simple HTTP server to serve test files
 function createTestServer(port = 8080) {
     const projectRoot = path.resolve(__dirname, '..');
+    const connections = new Set();
 
     const server = http.createServer((req, res) => {
         const parsedUrl = new URL(req.url, `http://localhost:${port}`);
@@ -69,10 +70,18 @@ function createTestServer(port = 8080) {
         });
     });
 
+    // Track connections to ensure proper cleanup
+    server.on('connection', (conn) => {
+        connections.add(conn);
+        conn.on('close', () => {
+            connections.delete(conn);
+        });
+    });
+
     return new Promise((resolve, reject) => {
         server.listen(port, (err) => {
             if (err) reject(err);
-            else resolve({ server, port });
+            else resolve({ server, port, connections });
         });
     });
 }
@@ -132,6 +141,7 @@ async function runTestInBrowser(testName, testHtmlFile) {
             // Override QUnit hooks when available
             const setupQUnit = () => {
                 if (window.QUnit && !window.qunitSetup) {
+                    window.QUnit.autostart = false;
                     window.qunitSetup = true;
                     console.log('🔧 Setting up QUnit hooks...');
 
@@ -181,7 +191,8 @@ async function runTestInBrowser(testName, testHtmlFile) {
         await page.goto(testUrl, { waitUntil: 'networkidle0' });
 
         // Wait for page to load and check what's available
-        await new Promise(resolve => setTimeout(resolve, 3000));
+        // Extra wait to ensure window load event has fully triggered
+        await new Promise(resolve => setTimeout(resolve, 5000));
 
         const debugInfo = await page.evaluate(() => {
             return {
@@ -205,32 +216,8 @@ async function runTestInBrowser(testName, testHtmlFile) {
             throw new Error('QUnit is not available on window');
         }
 
-        // Determine which test function to run based on the test file
-        let testFunction;
-        if (testName.includes('Tests 1')) {
-            testFunction = 'test';
-        } else if (testName.includes('Tests 2')) {
-            testFunction = 'test2';
-        } else if (testName.includes('CLMS-model')) {
-            testFunction = 'testClmsModel';
-        } else {
-            testFunction = 'test'; // fallback
-        }
-
-        // Manually trigger the test function
-        console.log(`🚀 Triggering XIVIEW_TEST.${testFunction}()...`);
-        await page.evaluate((fn) => {
-            if (window.XIVIEW_TEST && window.XIVIEW_TEST[fn]) {
-                window.XIVIEW_TEST[fn]();
-                // Also start QUnit if it's not already started
-                if (window.QUnit && !window.QUnit.config.started) {
-                    console.log('Starting QUnit...');
-                    window.QUnit.start();
-                }
-            } else {
-                throw new Error(`Test function ${fn} not found`);
-            }
-        }, testFunction);
+        // HTML page will automatically trigger tests via load event
+        console.log(`🚀 Waiting for HTML auto-start to trigger tests...`);
 
         // Wait for tests to complete
         console.log(`⏳ Waiting for tests to complete...`);
@@ -265,7 +252,19 @@ async function runTestInBrowser(testName, testHtmlFile) {
         }
         if (serverInfo && serverInfo.server) {
             console.log(`🔌 Shutting down test server...`);
-            serverInfo.server.close();
+
+            // Destroy all active connections
+            if (serverInfo.connections) {
+                serverInfo.connections.forEach(conn => conn.destroy());
+            }
+
+            // Promisify server.close() to ensure it completes
+            await new Promise((resolve) => {
+                serverInfo.server.close(() => {
+                    console.log(`✅ Test server closed`);
+                    resolve();
+                });
+            });
         }
     }
 }
@@ -274,9 +273,9 @@ async function runTests() {
     console.log('🚀 Starting xiVIEW headless test runner...');
 
     const testSuites = [
+        { name: 'CLMS-model Tests', htmlFile: 'CLMS-model/tests/qunit-clms-model.html' },
         { name: 'QUnit Tests 1', htmlFile: 'xiview/tests/qunit.html' },
-        { name: 'QUnit Tests 2', htmlFile: 'xiview/tests/qunit2.html' },
-        { name: 'CLMS-model Tests', htmlFile: 'CLMS-model/tests/qunit-clms-model.html' }
+        { name: 'QUnit Tests 2', htmlFile: 'xiview/tests/qunit2.html' }
     ];
 
     let allResults = [];

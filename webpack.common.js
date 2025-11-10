@@ -7,6 +7,7 @@ module.exports = {
     },
     output: {
         filename: "[name].js",
+        chunkFilename: "[name].js",
         path: path.resolve(__dirname, "dist"),
         library: "[name]",
         libraryTarget: "umd",
@@ -36,6 +37,11 @@ module.exports = {
                     name: "commons",
                     chunks: "initial",
                     minChunks: 2,
+                },
+                vendors: {
+                    test: /[\\/]node_modules[\\/]/,
+                    name: "vendors",
+                    chunks: "all",
                 },
             },
         },
