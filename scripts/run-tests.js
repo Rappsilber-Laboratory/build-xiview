@@ -1,344 +1,262 @@
 #!/usr/bin/env node
 
-const fs = require('fs');
-const path = require('path');
+/**
+ * Simple QUnit Test Harness
+ *
+ * Runs three QUnit HTML test files in headless Chrome via Puppeteer.
+ * Designed for simplicity, reliability, and easy understanding.
+ */
+
 const puppeteer = require('puppeteer');
 const http = require('http');
-const { URL } = require('url');
+const fs = require('fs');
+const path = require('path');
 
-// Simple HTTP server to serve test files
-function createTestServer(port = 8080) {
-    const projectRoot = path.resolve(__dirname, '..');
-    const connections = new Set();
+// Test files to run (relative to project root)
+const TEST_FILES = [
+    'xiview/tests/qunit.html',
+    'xiview/tests/qunit2.html',
+    'CLMS-model/tests/qunit-clms-model.html'
+];
+
+const SERVER_PORT = 8080;
+const TEST_TIMEOUT = 60000; // 60 seconds per test file
+
+/**
+ * Creates and starts a simple static file server
+ */
+function startServer(port) {
+    const projectRoot = path.join(__dirname, '..');
 
     const server = http.createServer((req, res) => {
-        const parsedUrl = new URL(req.url, `http://localhost:${port}`);
-        let filePath = path.join(projectRoot, parsedUrl.pathname);
+        // Build file path from URL (decode to handle spaces and special chars)
+        const urlPath = decodeURIComponent(req.url);
+        const filePath = path.join(projectRoot, urlPath === '/' ? 'index.html' : urlPath);
 
-        // Security: prevent directory traversal
-        if (!filePath.startsWith(projectRoot)) {
-            res.writeHead(403);
-            res.end('Forbidden');
-            return;
-        }
+        // Determine content type from file extension
+        const ext = path.extname(filePath);
+        const contentTypes = {
+            '.html': 'text/html',
+            '.js': 'text/javascript',
+            '.css': 'text/css',
+            '.json': 'application/json',
+            '.pdb': 'text/plain'
+        };
+        const contentType = contentTypes[ext] || 'application/octet-stream';
 
-        // Handle special requests
-        if (parsedUrl.pathname === '/favicon.ico') {
-            res.writeHead(404);
-            res.end('Not Found');
-            return;
-        }
-
-        // Check if file exists before trying to stat it
-        if (!fs.existsSync(filePath)) {
-            res.writeHead(404);
-            res.end('Not Found');
-            return;
-        }
-
-        // Default to index.html for directory requests
-        if (fs.statSync(filePath).isDirectory()) {
-            filePath = path.join(filePath, 'index.html');
-        }
-
+        // Read and serve the file
         fs.readFile(filePath, (err, data) => {
             if (err) {
-                if (err.code === 'ENOENT') {
-                    res.writeHead(404);
-                    res.end('Not Found');
-                } else {
-                    res.writeHead(500);
-                    res.end('Server Error');
-                }
-                return;
+                res.writeHead(404, { 'Content-Type': 'text/plain' });
+                res.end('404 Not Found');
+            } else {
+                res.writeHead(200, { 'Content-Type': contentType });
+                res.end(data);
             }
-
-            // Set appropriate content type
-            const ext = path.extname(filePath);
-            const contentTypes = {
-                '.html': 'text/html',
-                '.js': 'application/javascript',
-                '.css': 'text/css',
-                '.json': 'application/json'
-            };
-
-            res.writeHead(200, {
-                'Content-Type': contentTypes[ext] || 'text/plain',
-                'Access-Control-Allow-Origin': '*'
-            });
-            res.end(data);
-        });
-    });
-
-    // Track connections to ensure proper cleanup
-    server.on('connection', (conn) => {
-        connections.add(conn);
-        conn.on('close', () => {
-            connections.delete(conn);
         });
     });
 
     return new Promise((resolve, reject) => {
         server.listen(port, (err) => {
-            if (err) reject(err);
-            else resolve({ server, port, connections });
+            if (err) {
+                reject(err);
+            } else {
+                resolve(server);
+            }
         });
     });
 }
 
-async function runTestInBrowser(testName, testHtmlFile) {
-    console.log(`\n🧪 Running ${testName}...`);
+/**
+ * Runs a single QUnit test file and returns results
+ */
+async function runTest(browser, baseUrl, testFile) {
+    console.log(`\n${'='.repeat(70)}`);
+    console.log(`Running: ${testFile}`);
+    console.log('='.repeat(70));
 
-    let browser;
-    let serverInfo;
+    const page = await browser.newPage();
+
+    // Capture console errors for debugging
+    page.on('pageerror', error => {
+        console.log(`  Page Error: ${error.message}`);
+    });
+
     try {
-        // Start local HTTP server to serve test files
-        console.log(`🌐 Starting local test server...`);
-        serverInfo = await createTestServer(8080);
-        console.log(`🌐 Test server running on http://localhost:${serverInfo.port}`);
+        // Navigate to the test page
+        const url = `${baseUrl}/${testFile}`;
+        console.log(`Loading: ${url}`);
+        await page.goto(url, {
+            waitUntil: 'networkidle0',
+            timeout: TEST_TIMEOUT
+        });
 
-        // Launch Puppeteer
+        // Wait for QUnit to complete and extract results
+        // This runs in the browser context
+        const results = await page.evaluate(() => {
+            return new Promise((resolve, reject) => {
+                // Safety timeout - if QUnit doesn't finish in time, reject
+                const safetyTimeout = setTimeout(() => {
+                    reject(new Error('QUnit did not complete within timeout period'));
+                }, 55000); // Slightly less than TEST_TIMEOUT
+
+                // Poll for QUnit availability and completion
+                const checkInterval = 200;
+                let checkCount = 0;
+                const maxChecks = 275; // 55 seconds / 200ms
+
+                const checkQUnit = () => {
+                    checkCount++;
+
+                    // Give up after max checks
+                    if (checkCount >= maxChecks) {
+                        clearTimeout(safetyTimeout);
+                        reject(new Error('QUnit did not become available within timeout period'));
+                        return;
+                    }
+
+                    // Check if QUnit is available globally
+                    if (typeof window.QUnit !== 'undefined') {
+                        // QUnit is available - check if it's already done
+                        const config = window.QUnit.config;
+
+                        // If QUnit has already finished, get results from config
+                        if (config && config.stats && config.stats.all !== undefined) {
+                            clearTimeout(safetyTimeout);
+                            resolve({
+                                passed: config.stats.all - config.stats.bad,
+                                failed: config.stats.bad,
+                                total: config.stats.all,
+                                runtime: config.stats.runtime || 0
+                            });
+                            return;
+                        }
+
+                        // QUnit exists but hasn't finished - register done callback
+                        window.QUnit.done((details) => {
+                            clearTimeout(safetyTimeout);
+                            resolve({
+                                passed: details.passed,
+                                failed: details.failed,
+                                total: details.total,
+                                runtime: details.runtime
+                            });
+                        });
+                        return;
+                    }
+
+                    // QUnit not available yet, check again
+                    setTimeout(checkQUnit, checkInterval);
+                };
+
+                // Start checking
+                checkQUnit();
+            });
+        });
+
+        // Display results
+        console.log(`\nResults:`);
+        console.log(`  Total:   ${results.total}`);
+        console.log(`  Passed:  ${results.passed}`);
+        console.log(`  Failed:  ${results.failed}`);
+        console.log(`  Runtime: ${results.runtime}ms`);
+
+        if (results.failed > 0) {
+            console.log(`  ⚠️  ${results.failed} test(s) failed`);
+        } else {
+            console.log(`  ✓ All tests passed`);
+        }
+
+        return results;
+
+    } finally {
+        // Always close the page
+        await page.close();
+    }
+}
+
+/**
+ * Main test harness function
+ */
+async function main() {
+    console.log('\n╔═══════════════════════════════════════════════════════════════════╗');
+    console.log('║           QUnit Test Harness - xiVIEW Test Suite                 ║');
+    console.log('╚═══════════════════════════════════════════════════════════════════╝\n');
+
+    let server = null;
+    let browser = null;
+
+    try {
+        // Step 1: Start HTTP server
+        console.log(`Starting HTTP server on port ${SERVER_PORT}...`);
+        server = await startServer(SERVER_PORT);
+        console.log('✓ HTTP server started\n');
+
+        const baseUrl = `http://localhost:${SERVER_PORT}`;
+
+        // Step 2: Launch headless browser
+        console.log('Launching headless browser...');
         browser = await puppeteer.launch({
             headless: true,
-            args: ['--no-sandbox', '--disable-setuid-sandbox']
+            args: [
+                '--no-sandbox',
+                '--disable-setuid-sandbox',
+                '--disable-dev-shm-usage'
+            ]
         });
+        console.log('✓ Browser launched');
 
-        const page = await browser.newPage();
-
-        // Set up test result collection
-        const testResults = {
-            passed: 0,
-            failed: 0,
-            total: 0,
-            runtime: 0,
-            details: [],
-            error: null
-        };
-
-        // Listen to console logs from the page
-        page.on('console', (msg) => {
-            const text = msg.text();
-            if (text.includes('✅') || text.includes('❌') || text.includes('📊')) {
-                console.log(`  ${text}`);
-            }
-        });
-
-        // Listen to page errors - but don't fail on expected issues
-        page.on('pageerror', (error) => {
-            console.warn(`⚠️ Page warning: ${error.message}`);
-        });
-
-        // Inject QUnit result collection
-        await page.evaluateOnNewDocument(() => {
-            window.testResults = {
-                passed: 0,
-                failed: 0,
-                total: 0,
-                runtime: 0,
-                details: []
-            };
-
-            // Override QUnit hooks when available
-            const setupQUnit = () => {
-                if (window.QUnit && !window.qunitSetup) {
-                    window.QUnit.autostart = false;
-                    window.qunitSetup = true;
-                    console.log('🔧 Setting up QUnit hooks...');
-
-                    window.QUnit.testDone((details) => {
-                        window.testResults.total++;
-                        if (details.failed === 0) {
-                            window.testResults.passed++;
-                            console.log(`✅ ${details.name} (${details.runtime}ms)`);
-                        } else {
-                            window.testResults.failed++;
-                            console.log(`❌ ${details.name} (${details.runtime}ms)`);
-                            details.assertions.forEach(assertion => {
-                                if (!assertion.result) {
-                                    console.log(`💥 ${assertion.message || 'Assertion failed'}`);
-                                }
-                            });
-                        }
-                        window.testResults.details.push(details);
-                    });
-
-                    window.QUnit.done((details) => {
-                        window.testResults.runtime = details.runtime;
-                        console.log(`📊 Tests completed: ${details.total} total, ${details.passed} passed, ${details.failed} failed (${details.runtime}ms)`);
-                        window.testsCompleted = true;
-                    });
-                }
-            };
-
-            // Keep trying to set up QUnit
-            const checkInterval = setInterval(() => {
-                if (window.QUnit && !window.qunitSetup) {
-                    setupQUnit();
-                }
-                if (window.qunitSetup) {
-                    clearInterval(checkInterval);
-                }
-            }, 50);
-
-            // Stop checking after 10 seconds
-            setTimeout(() => clearInterval(checkInterval), 10000);
-        });
-
-        // Navigate to the test HTML file via HTTP server
-        const testUrl = `http://localhost:${serverInfo.port}/${testHtmlFile}`;
-
-        console.log(`🌐 Loading ${testUrl}...`);
-        await page.goto(testUrl, { waitUntil: 'networkidle0' });
-
-        // Wait for page to load and check what's available
-        // Extra wait to ensure window load event has fully triggered
-        await new Promise(resolve => setTimeout(resolve, 5000));
-
-        const debugInfo = await page.evaluate(() => {
-            return {
-                hasXiview: typeof window.xiview !== 'undefined',
-                xiviewKeys: window.xiview ? Object.keys(window.xiview) : [],
-                hasXIVIEW_TEST: typeof window.XIVIEW_TEST !== 'undefined',
-                xiviewTestKeys: window.XIVIEW_TEST ? Object.keys(window.XIVIEW_TEST) : [],
-                hasQUnit: typeof window.QUnit !== 'undefined',
-                qunitSetup: window.qunitSetup || false,
-                windowKeys: Object.keys(window).filter(k => !k.startsWith('_')).slice(0, 20)
-            };
-        });
-
-        console.log(`🔍 Debug info:`, JSON.stringify(debugInfo, null, 2));
-
-        if (!debugInfo.hasXIVIEW_TEST) {
-            throw new Error('XIVIEW_TEST is not available on window');
+        // Step 3: Run each test file sequentially
+        const allResults = [];
+        for (const testFile of TEST_FILES) {
+            const results = await runTest(browser, baseUrl, testFile);
+            allResults.push(results);
         }
 
-        if (!debugInfo.hasQUnit) {
-            throw new Error('QUnit is not available on window');
+        // Step 4: Display summary
+        console.log('\n' + '═'.repeat(70));
+        console.log('FINAL SUMMARY');
+        console.log('═'.repeat(70));
+
+        const totals = allResults.reduce((acc, r) => ({
+            total: acc.total + r.total,
+            passed: acc.passed + r.passed,
+            failed: acc.failed + r.failed,
+            runtime: acc.runtime + r.runtime
+        }), { total: 0, passed: 0, failed: 0, runtime: 0 });
+
+        console.log(`\nTotal tests:   ${totals.total}`);
+        console.log(`Passed:        ${totals.passed}`);
+        console.log(`Failed:        ${totals.failed}`);
+        console.log(`Total runtime: ${totals.runtime}ms`);
+
+        // Step 5: Exit with appropriate code
+        if (totals.failed > 0) {
+            console.log('\n❌ TEST SUITE FAILED\n');
+            process.exit(1);
+        } else {
+            console.log('\n✅ ALL TESTS PASSED\n');
+            process.exit(0);
         }
-
-        // HTML page will automatically trigger tests via load event
-        console.log(`🚀 Waiting for HTML auto-start to trigger tests...`);
-
-        // Wait for tests to complete
-        console.log(`⏳ Waiting for tests to complete...`);
-        await page.waitForFunction(
-            () => window.testsCompleted === true,
-            { timeout: 30000 }
-        );
-
-        // Get the test results
-        const results = await page.evaluate(() => window.testResults);
-
-        testResults.passed = results.passed;
-        testResults.failed = results.failed;
-        testResults.total = results.total;
-        testResults.runtime = results.runtime;
-        testResults.details = results.details;
-
-        return testResults;
 
     } catch (error) {
-        console.error(`❌ Error running ${testName}:`, error.message);
-        return {
-            passed: 0,
-            failed: 1,
-            total: 1,
-            runtime: 0,
-            error: error.message
-        };
+        console.error('\n❌ ERROR:', error.message);
+        console.error(error.stack);
+        process.exit(1);
+
     } finally {
+        // Cleanup: close browser and server
         if (browser) {
             await browser.close();
         }
-        if (serverInfo && serverInfo.server) {
-            console.log(`🔌 Shutting down test server...`);
-
-            // Destroy all active connections
-            if (serverInfo.connections) {
-                serverInfo.connections.forEach(conn => conn.destroy());
-            }
-
-            // Promisify server.close() to ensure it completes
-            await new Promise((resolve) => {
-                serverInfo.server.close(() => {
-                    console.log(`✅ Test server closed`);
-                    resolve();
-                });
-            });
+        if (server) {
+            server.close();
         }
     }
 }
 
-async function runTests() {
-    console.log('🚀 Starting xiVIEW headless test runner...');
-
-    const testSuites = [
-        { name: 'CLMS-model Tests', htmlFile: 'CLMS-model/tests/qunit-clms-model.html' },
-        { name: 'QUnit Tests 1', htmlFile: 'xiview/tests/qunit.html' },
-        { name: 'QUnit Tests 2', htmlFile: 'xiview/tests/qunit2.html' }
-    ];
-
-    let allResults = [];
-    let allTestsPassed = true;
-
-    for (const suite of testSuites) {
-        const result = await runTestInBrowser(suite.name, suite.htmlFile);
-        allResults.push({ name: suite.name, ...result });
-
-        if (result.failed > 0 || result.error) {
-            allTestsPassed = false;
-        }
-    }
-
-    // Summary
-    console.log('\n' + '='.repeat(50));
-    console.log('📋 FINAL TEST SUMMARY');
-    console.log('='.repeat(50));
-
-    let totalPassed = 0;
-    let totalFailed = 0;
-    let totalRuntime = 0;
-
-    allResults.forEach(result => {
-        console.log(`\n${result.name}:`);
-        if (result.error) {
-            console.log(`  ❌ Error: ${result.error}`);
-            totalFailed += 1;
-        } else {
-            console.log(`  ✅ Passed: ${result.passed}`);
-            console.log(`  ❌ Failed: ${result.failed}`);
-            console.log(`  ⏱️  Runtime: ${result.runtime}ms`);
-            totalPassed += result.passed;
-            totalFailed += result.failed;
-            totalRuntime += result.runtime;
-        }
-    });
-
-    console.log('\n' + '='.repeat(30));
-    console.log(`📈 TOTALS:`);
-    console.log(`   Tests: ${totalPassed + totalFailed}`);
-    console.log(`   Passed: ${totalPassed}`);
-    console.log(`   Failed: ${totalFailed}`);
-    console.log(`   Runtime: ${totalRuntime}ms`);
-
-    if (allTestsPassed && totalFailed === 0) {
-        console.log('\n🎉 All tests passed!');
-        process.exit(0);
-    } else {
-        console.log('\n💥 Some tests failed!');
-        process.exit(1);
-    }
-}
-
-// Check if dist/xiview.js exists
-const distPath = path.join(__dirname, '../dist/xiview.js');
-if (!fs.existsSync(distPath)) {
-    console.error('❌ dist/xiview.js not found. Run "npm run build-dev" first.');
-    process.exit(1);
-}
-
-console.log('🚀 Starting xiVIEW test runner...');
-runTests().catch(error => {
-    console.error('❌ Test runner failed:', error);
+// Execute main function
+main().catch(error => {
+    console.error('Unhandled error:', error);
     process.exit(1);
 });
