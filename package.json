@@ -41,13 +41,18 @@
   ],
   "main": "./xiview/js/main.js",
   "scripts": {
+    "lint": "eslint CLMS-model/src crosslink-viewer/js xiview/js spectrum/src",
+    "test": "node scripts/run-tests.js",
+    "diagram:clms": "node scripts/diagram-gen/generate-diagram.js --config scripts/diagram-gen/configs/clms-model-config.js",
+    "diagram:xiview": "node scripts/diagram-gen/generate-diagram.js --config scripts/diagram-gen/configs/xiview-config.js",
+    "diagram:crosslink": "node scripts/diagram-gen/generate-diagram.js --config scripts/diagram-gen/configs/crosslink-viewer-config.js",
+    "diagram:spectrum": "node scripts/diagram-gen/generate-diagram.js --config scripts/diagram-gen/configs/spectrum-config.js",
+    "diagram:all": "npm run diagram:clms && npm run diagram:xiview && npm run diagram:crosslink && npm run diagram:spectrum",
     "build-dev": "rm -rf dist && webpack --mode development --config webpack.dev.js;",
     "build-prod": "rm -rf dist && webpack --mode production --config webpack.prod.js;",
-    "build-dev-and-copy-to-xiview-server": "npm run build-dev; cp dist/* ../xiview-server/static/ ;",
-    "build-prod-and-copy-to-xiview-server": "npm run build-prob; cp dist/xiview.js ../xiview-server/static/xiview.js;",
-    "lint": "eslint CLMS-model/src crosslink-viewer/js xiview/js spectrum/src",
-    "test": "npm run test-headless",
-    "test-headless": "node scripts/run-tests.js"
+    "copy-to-xiview-server": "cp dist/* ../xiview-server/static/ ;",
+    "build-prod-and-copy-to-xiview-server": "npm run build-prod && npm run copy-to-xiview-server;",
+    "all-dev": "npm run lint && npm run build-dev && npm run test && npm run copy-to-xiview-server;"
   },
   "dependencies": {
     "@eastdesire/jscolor": "~2.5.2",
@@ -59,6 +64,7 @@
     "datatables.net-dt": "~1.13.10",
     "jquery": "~3.7.1",
     "jquery-ui": "~1.14.1",
+    "json-formatter-js": "^2.5.23",
     "jsonview": "~1.2.0",
     "ngl": "~2.3.1",
     "path-browserify": "^1.0.1",
@@ -69,6 +75,7 @@
   },
   "devDependencies": {
     "@babel/core": "^7.21.5",
+    "@babel/parser": "^7.28.5",
     "@babel/preset-env": "^7.21.5",
     "babel-loader": "^9.1.2",
     "css-loader": "^5.2.7",
@@ -81,7 +88,8 @@
     "url-loader": "^4.1.1",
     "webpack": "^5.81.0",
     "webpack-cli": "^5.0.2",
-    "webpack-merge": "^5.8.0"
+    "webpack-merge": "^5.8.0",
+    "xmlbuilder2": "^4.0.0"
   },
   "engines": {
     "node": ">=20.12.1 "

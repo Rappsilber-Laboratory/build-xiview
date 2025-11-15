@@ -46,7 +46,7 @@ repos:
     hooks:
       - id: npm-test
         name: run npm tests
-        entry: npm run test-headless
+        entry: npm run test
         language: system
         pass_filenames: false
         files: '\.(js|json)$'

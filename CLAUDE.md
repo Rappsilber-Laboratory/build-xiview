@@ -96,3 +96,4 @@ The submodules point to separate repositories for each component, allowing indep
 - no changes, no linting and no checking the formatting of code inside directories named "vendor"
 - BEFORE RUNNING ANY BASH COMMAND ALWAYS CHECK THE PRESENT WORKING DIRECTORY AND ADJUST COMMANDS ACCORDINGLY
 - DO NOT ADD QUNIT IMPORT TO HTML FILES (its include in the development bundle)
+- i'll run the tests
