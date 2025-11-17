@@ -93,11 +93,103 @@ function analyzeFile(content, filename, config) {
             }
         }
 
+        // If no classes found, create a pseudo-class from top-level functions
+        if (classes.length === 0) {
+            const pseudoClass = extractFunctionsAsPseudoClass(ast, filename, config);
+            if (pseudoClass) {
+                classes.push(pseudoClass);
+            }
+        }
+
         return classes;
     } catch (error) {
         console.error(`Error parsing ${filename}:`, error.message);
         return null;
     }
+}
+
+/**
+ * Extract top-level functions and create a pseudo-class for files without classes
+ * @param {object} ast - Babel AST
+ * @param {string} filename - Name of the file (will be used as pseudo-class name)
+ * @param {object} config - Configuration options
+ * @returns {object|null} Pseudo-class metadata or null if no functions found
+ */
+function extractFunctionsAsPseudoClass(ast, filename, config) {
+    const methods = [];
+
+    // Traverse AST to find top-level functions
+    for (const node of ast.program.body) {
+        let functionNode = null;
+        let functionName = null;
+
+        // Function declarations: function foo() {}
+        if (node.type === "FunctionDeclaration" && node.id) {
+            functionNode = node;
+            functionName = node.id.name;
+        }
+        // Exported function declarations: export function foo() {}
+        else if (node.type === "ExportNamedDeclaration" && node.declaration?.type === "FunctionDeclaration") {
+            functionNode = node.declaration;
+            functionName = node.declaration.id.name;
+        }
+        // Variable declarations with function expressions: const foo = function() {}
+        else if (node.type === "VariableDeclaration") {
+            for (const declarator of node.declarations) {
+                if (declarator.init &&
+                    (declarator.init.type === "FunctionExpression" ||
+                     declarator.init.type === "ArrowFunctionExpression")) {
+                    functionNode = declarator.init;
+                    functionName = declarator.id.name;
+                    break;
+                }
+            }
+        }
+        // Exported variable with function: export const foo = () => {}
+        else if (node.type === "ExportNamedDeclaration" && node.declaration?.type === "VariableDeclaration") {
+            for (const declarator of node.declaration.declarations) {
+                if (declarator.init &&
+                    (declarator.init.type === "FunctionExpression" ||
+                     declarator.init.type === "ArrowFunctionExpression")) {
+                    functionNode = declarator.init;
+                    functionName = declarator.id.name;
+                    break;
+                }
+            }
+        }
+
+        // Extract function info if found
+        if (functionNode && functionName) {
+            const isPrivate = isPrivateMember(functionName);
+
+            // Apply filtering based on config
+            if (isPrivate && !config.methods.includePrivate) continue;
+
+            methods.push({
+                name: functionName,
+                visibility: isPrivate ? "private" : "public",
+                params: functionNode.params ? functionNode.params.length : 0,
+                source: "function",
+            });
+        }
+    }
+
+    // If no functions found, don't create a pseudo-class
+    if (methods.length === 0) {
+        return null;
+    }
+
+    // Apply method filtering and limits
+    const filteredMethods = filterMethods(methods, config.methods);
+
+    // Create pseudo-class with filename as class name
+    return {
+        name: filename, // Use filename including .js extension
+        filename,
+        properties: [], // No properties for function modules
+        methods: filteredMethods,
+        superClass: null, // No inheritance for pseudo-classes
+    };
 }
 
 /**

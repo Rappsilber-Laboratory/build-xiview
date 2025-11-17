@@ -5,7 +5,7 @@
 
 module.exports = {
     // Source and output paths
-    sourceDir: "./CLMS-model/src",
+    sourceDir: "./CLMS-model/js",
     outputFile: "./CLMS-model/clms-model-diagram.dia",
 
     // Which classes to include
@@ -16,7 +16,7 @@ module.exports = {
 
     // Property filtering options
     properties: {
-        includePrivate: false,          // Include properties starting with _
+        includePrivate: true,          // Include properties starting with _
         includeGetters: true,           // Include getters as properties (recommended: true)
                                         // When true: getters appear in properties section as "propName: type"
                                         // When false: getters can appear in methods section (if methods.includeGetters is true)

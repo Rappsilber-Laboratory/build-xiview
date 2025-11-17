@@ -5,7 +5,7 @@
 
 module.exports = {
     // Source and output paths
-    sourceDir: "./crosslink-viewer/js/views",
+    sourceDir: "./crosslink-viewer/js",
     outputFile: "./crosslink-viewer/crosslink-viewer-diagram.dia",
 
     // Which classes to include
@@ -33,14 +33,14 @@ module.exports = {
 
     // Relationship detection options
     relationships: {
-        enabled: false,                 // Master switch for relationship detection
-        detectComposition: true,        // Detect composition from property assignments
+        enabled: true,                 // Master switch for relationship detection
+        detectComposition: false,        // Detect composition from property assignments
         detectInheritance: true,        // Detect extends relationships
 
         // Visual options
         showMultiplicity: false,        // Show multiplicity labels
         showRoleNames: false,           // Show role names on relationships
-        autoRoute: true,                // Use automatic orthogonal routing
+        autoRoute: false,                // Use automatic orthogonal routing
     },
 
     // Layout and visual customization
@@ -49,6 +49,11 @@ module.exports = {
         defaultWidth: 12,
         defaultHeight: 11,
         spacing: 2,
+
+        // Grid layout for auto-positioning
+        columns: 6,                     // Number of columns in grid layout
+        horizontalSpacing: 20,          // Horizontal spacing between classes
+        verticalSpacing: 15,            // Vertical spacing between classes
 
         // Positioning strategy
         strategy: "manual",

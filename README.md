@@ -1,13 +1,13 @@
 # xiVIEW Build Container
 
-xiVIEW is a web-based visualization tool for cross-linking mass spectrometry data developed by the Rappsilber Laboratory. This container repository uses git submodules to organize multiple JavaScript subprojects into a unified build system.
+xiVIEW is a web-based visualization tool for crosslinking mass spectrometry data developed by the Rappsilber Laboratory. This container repository uses git submodules to organize multiple JavaScript subprojects into a unified build system.
 
 ## Project Architecture
 
 This repository brings together four main components:
 
 - **[xiview/](xiview/)** - Main application with UI components, views, and application logic
-- **[CLMS-model/](CLMS-model/)** - Core data model for cross-linking mass spectrometry data
+- **[CLMS-model/](CLMS-model/)** - Core data model for crosslinking mass spectrometry data
 - **[crosslink-viewer/](crosslink-viewer/)** - xiNET crosslink network visualization component
 - **[spectrum/](spectrum/)** - xiSPEC spectrum viewer component
 

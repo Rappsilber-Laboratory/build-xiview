@@ -4,7 +4,7 @@
  */
 
 const { create } = require("xmlbuilder2");
-const { generateRelationships } = require("./dia-relationship-generator");
+const { generateRelationships, calculateHierarchicalPositions } = require("./dia-relationship-generator");
 
 /**
  * Generate .dia XML from class metadata
@@ -24,9 +24,12 @@ function generateDiagram(classes, relationships, config) {
     // Add layer with all classes
     const layer = root.ele("dia:layer", { name: "Background", visible: "true", active: "true" });
 
+    // Calculate hierarchical positions based on inheritance
+    const hierarchicalPositions = calculateHierarchicalPositions(classes, relationships, config);
+
     // Generate class objects
     classes.forEach((classInfo, index) => {
-        addClassObject(layer, classInfo, index, config);
+        addClassObject(layer, classInfo, index, config, hierarchicalPositions);
     });
 
     // Generate relationship objects
@@ -103,14 +106,15 @@ function addDiagramData(root) {
  * @param {object} classInfo - Class metadata
  * @param {number} index - Class index for ID
  * @param {object} config - Layout configuration
+ * @param {object} hierarchicalPositions - Pre-calculated hierarchical positions
  */
-function addClassObject(layer, classInfo, index, config) {
+function addClassObject(layer, classInfo, index, config, hierarchicalPositions) {
     const className = classInfo.name;
 
-    // Get position and size from config
-    const position = config.layout.positions[className] || {
-        x: 10 + (index % 3) * 15,
-        y: 10 + Math.floor(index / 3) * 15,
+    // Get position: manual override > hierarchical > fallback
+    const position = config.layout.positions[className] || hierarchicalPositions[className] || {
+        x: 10,
+        y: 10,
         width: config.layout.defaultWidth,
         height: config.layout.defaultHeight,
     };
@@ -305,6 +309,95 @@ function addOperations(obj, methods) {
  * @param {object} relObj - Relationship object with points, orientations, etc.
  */
 function addRelationshipObject(layer, relObj) {
+    if (relObj.type === "inheritance") {
+        // Use UML - Generalization for inheritance relationships
+        addGeneralizationObject(layer, relObj);
+    } else {
+        // Use UML - Association for composition and other relationships
+        addAssociationObject(layer, relObj);
+    }
+}
+
+/**
+ * Add a UML - Generalization object for inheritance
+ * @param {object} layer - Layer element
+ * @param {object} relObj - Relationship object with points, orientations, etc.
+ */
+function addGeneralizationObject(layer, relObj) {
+    const obj = layer.ele("dia:object", {
+        type: "UML - Generalization",
+        version: "1",
+        id: relObj.id
+    });
+
+    // Name (usually empty)
+    obj.ele("dia:attribute", { name: "name" })
+        .ele("dia:string", {}).txt("##");
+
+    // Stereotype (usually empty)
+    obj.ele("dia:attribute", { name: "stereotype" })
+        .ele("dia:string", {}).txt("##");
+
+    // Object position (first point)
+    const firstPoint = relObj.points[0];
+    obj.ele("dia:attribute", { name: "obj_pos" })
+        .ele("dia:point", { val: `${firstPoint.x},${firstPoint.y}` });
+
+    // Bounding box
+    const bb = relObj.boundingBox;
+    obj.ele("dia:attribute", { name: "obj_bb" })
+        .ele("dia:rectangle", {
+            val: `${bb.minX},${bb.minY};${bb.maxX},${bb.maxY}`
+        });
+
+    // Orthogonal points
+    const orthPoints = obj.ele("dia:attribute", { name: "orth_points" });
+    relObj.points.forEach(point => {
+        orthPoints.ele("dia:point", { val: `${point.x},${point.y}` });
+    });
+
+    // Orthogonal orientations
+    const orthOrient = obj.ele("dia:attribute", { name: "orth_orient" });
+    relObj.orientations.forEach(orientation => {
+        orthOrient.ele("dia:enum", { val: orientation.toString() });
+    });
+
+    // Auto-routing
+    obj.ele("dia:attribute", { name: "autorouting" })
+        .ele("dia:boolean", { val: "true" });
+
+    // Colors
+    obj.ele("dia:attribute", { name: "text_colour" })
+        .ele("dia:color", { val: "#000000" });
+    obj.ele("dia:attribute", { name: "line_colour" })
+        .ele("dia:color", { val: "#000000" });
+
+    // Line width
+    obj.ele("dia:attribute", { name: "line_width" })
+        .ele("dia:real", { val: "0.1" });
+
+    // Connections to class objects
+    // For UML Generalization: handle 0 goes to parent (superclass), handle 1 to child (subclass)
+    // Connection point 6 = middle bottom, connection point 1 = middle top
+    const connections = obj.ele("dia:connections");
+    connections.ele("dia:connection", {
+        handle: "0",
+        to: `O${relObj.toId}`,  // parent class - connect to middle bottom (6)
+        connection: "6"
+    });
+    connections.ele("dia:connection", {
+        handle: "1",
+        to: `O${relObj.fromId}`,  // child class - connect to middle top (1)
+        connection: "1"
+    });
+}
+
+/**
+ * Add a UML - Association object for composition and other relationships
+ * @param {object} layer - Layer element
+ * @param {object} relObj - Relationship object with points, orientations, etc.
+ */
+function addAssociationObject(layer, relObj) {
     const obj = layer.ele("dia:object", {
         type: "UML - Association",
         version: "2",
@@ -390,17 +483,17 @@ function addRelationshipObject(layer, relObj) {
         .ele("dia:color", { val: "#000000" });
 
     // Connections to class objects
-    // Use connection point 22 (standard center/edge point)
+    // Use connection point 8 (first attribute/method point, typically center-right area)
     const connections = obj.ele("dia:connections");
     connections.ele("dia:connection", {
         handle: "0",
         to: `O${relObj.fromId}`,
-        connection: "22"
+        connection: "8"
     });
     connections.ele("dia:connection", {
         handle: "1",
         to: `O${relObj.toId}`,
-        connection: "22"
+        connection: "8"
     });
 }
 

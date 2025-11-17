@@ -5,8 +5,8 @@
 
 module.exports = {
     // Source and output paths
-    sourceDir: "./xiview/js/views",
-    outputFile: "./xiview/xiview-views-diagram.dia",
+    sourceDir: "./xiview/js/",
+    outputFile: "./xiview/new-xiview-diagram.dia",
 
     // Which classes to include
     classes: {
@@ -36,14 +36,14 @@ module.exports = {
 
     // Relationship detection options
     relationships: {
-        enabled: false,                 // Master switch for relationship detection
-        detectComposition: true,        // Detect composition from property assignments
+        enabled: true,                 // Master switch for relationship detection
+        detectComposition: false,        // Detect composition from property assignments
         detectInheritance: true,        // Detect extends relationships
 
         // Visual options
         showMultiplicity: false,        // Show multiplicity labels (1, *, 0..1)
         showRoleNames: false,           // Show role names on relationships
-        autoRoute: true,                // Use automatic orthogonal routing
+        autoRoute: false,                // Use automatic orthogonal routing
     },
 
     // Layout and visual customization
@@ -52,6 +52,11 @@ module.exports = {
         defaultWidth: 12,
         defaultHeight: 11,
         spacing: 2,                     // Space between classes
+
+        // Grid layout for auto-positioning
+        columns: 10,                    // Number of columns in grid layout
+        horizontalSpacing: 20,          // Horizontal spacing between classes
+        verticalSpacing: 15,            // Vertical spacing between classes
 
         // Positioning strategy: "manual"
         strategy: "manual",

@@ -4,14 +4,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-xiVIEW is a web-based visualization tool for cross-linking mass spectrometry data developed by the Rappsilber Laboratory. The project uses a git submodule architecture to organize multiple JavaScript subprojects into a unified build system.
+xiVIEW is a web-based visualization tool for crosslinking mass spectrometry data developed by the Rappsilber Laboratory. The project uses a git submodule architecture to organize multiple JavaScript subprojects into a unified build system.
 
 ## Architecture
 
 This is a container repository that uses git submodules to organize four main components:
 
 - **xiview/**: Main application code with UI components, views, and application logic (branch: v2)
-- **CLMS-model/**: Core data model for cross-linking mass spectrometry data (branch: v2)
+- **CLMS-model/**: Core data model for crosslinking mass spectrometry data (branch: v2)
 - **crosslink-viewer/**: xiNET crosslink network visualization component (branch: master)
 - **spectrum/**: xiSPEC spectrum viewer component (branch: dev)
 
@@ -35,10 +35,9 @@ npm run build-dev
 # Production build
 npm run build-prod
 
-# Build and copy to specific deployment targets
-npm run build-dev-and-copy-to-pride
-npm run build-prod-and-copy-to-xiview_org
-npm run build-dev-and-copy-to-xi2
+# Build and copy to xiview-server
+npm run build-dev-and-copy-to-xiview-server
+npm run build-prod-and-copy-to-xiview-server
 ```
 
 ### Linting
@@ -50,9 +49,8 @@ npm run lint
 Comprehensive automated testing infrastructure with QUnit and Puppeteer:
 ```bash
 # From build-xiview root
-npm test               # Full test suite with build
-npm run test-headless  # Headless browser testing (assumes built)
-npm run lint           # Code quality checks
+npm test      # Full test suite (runs node scripts/run-tests.js)
+npm run lint  # Code quality checks
 ```
 
 **Test Infrastructure (Modernized)**:
@@ -97,3 +95,4 @@ The submodules point to separate repositories for each component, allowing indep
 - BEFORE RUNNING ANY BASH COMMAND ALWAYS CHECK THE PRESENT WORKING DIRECTORY AND ADJUST COMMANDS ACCORDINGLY
 - DO NOT ADD QUNIT IMPORT TO HTML FILES (its include in the development bundle)
 - i'll run the tests
+- don't lint, test and build - i'll do that

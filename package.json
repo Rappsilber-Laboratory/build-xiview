@@ -41,16 +41,21 @@
   ],
   "main": "./xiview/js/main.js",
   "scripts": {
-    "lint": "eslint CLMS-model/src crosslink-viewer/js xiview/js spectrum/src",
+    "lint": "eslint CLMS-model/js/models crosslink-viewer/js xiview/js spectrum/src",
     "test": "node scripts/run-tests.js",
     "diagram:clms": "node scripts/diagram-gen/generate-diagram.js --config scripts/diagram-gen/configs/clms-model-config.js",
     "diagram:xiview": "node scripts/diagram-gen/generate-diagram.js --config scripts/diagram-gen/configs/xiview-config.js",
     "diagram:crosslink": "node scripts/diagram-gen/generate-diagram.js --config scripts/diagram-gen/configs/crosslink-viewer-config.js",
     "diagram:spectrum": "node scripts/diagram-gen/generate-diagram.js --config scripts/diagram-gen/configs/spectrum-config.js",
     "diagram:all": "npm run diagram:clms && npm run diagram:xiview && npm run diagram:crosslink && npm run diagram:spectrum",
+    "update:clms": "node scripts/diagram-gen/update-diagram.js --config scripts/diagram-gen/configs/clms-model-config.js",
+    "update:xiview": "node scripts/diagram-gen/update-diagram.js --config scripts/diagram-gen/configs/xiview-config.js",
+    "update:crosslink": "node scripts/diagram-gen/update-diagram.js --config scripts/diagram-gen/configs/crosslink-viewer-config.js",
+    "update:spectrum": "node scripts/diagram-gen/update-diagram.js --config scripts/diagram-gen/configs/spectrum-config.js",
     "build-dev": "rm -rf dist && webpack --mode development --config webpack.dev.js;",
     "build-prod": "rm -rf dist && webpack --mode production --config webpack.prod.js;",
     "copy-to-xiview-server": "cp dist/* ../xiview-server/static/ ;",
+    "build-dev-and-copy-to-xiview-server": "npm run build-dev && npm run copy-to-xiview-server;",
     "build-prod-and-copy-to-xiview-server": "npm run build-prod && npm run copy-to-xiview-server;",
     "all-dev": "npm run lint && npm run build-dev && npm run test && npm run copy-to-xiview-server;"
   },
@@ -89,6 +94,7 @@
     "webpack": "^5.81.0",
     "webpack-cli": "^5.0.2",
     "webpack-merge": "^5.8.0",
+    "xml2js": "^0.6.2",
     "xmlbuilder2": "^4.0.0"
   },
   "engines": {

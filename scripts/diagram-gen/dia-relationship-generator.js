@@ -118,6 +118,95 @@ function calculateBoundingBox(points) {
 }
 
 /**
+ * Calculate hierarchical positions for classes based on inheritance
+ * @param {Array} classes - Array of class metadata
+ * @param {Array} relationships - Array of relationship objects (for inheritance)
+ * @param {object} config - Layout configuration
+ * @returns {object} Map of className -> {x, y, width, height}
+ */
+function calculateHierarchicalPositions(classes, relationships, config) {
+    const columns = config.layout.columns || 8;
+    const horizontalSpacing = config.layout.horizontalSpacing || 18;
+    const verticalSpacing = config.layout.verticalSpacing || 15;
+
+    // Build inheritance map: child -> parent
+    const parentMap = {};
+    const childrenMap = {}; // parent -> [children]
+
+    relationships.forEach(rel => {
+        if (rel.type === "inheritance") {
+            parentMap[rel.from] = rel.to; // from is child, to is parent
+            if (!childrenMap[rel.to]) {
+                childrenMap[rel.to] = [];
+            }
+            childrenMap[rel.to].push(rel.from);
+        }
+    });
+
+    // Build class name set
+    const classNames = new Set(classes.map(c => c.name));
+
+    // Find root classes (no parent or parent not in diagram)
+    const roots = classes.filter(cls => {
+        const parent = parentMap[cls.name];
+        return !parent || !classNames.has(parent);
+    });
+
+    // Assign levels to all classes
+    const levels = {};
+    const visited = new Set();
+
+    function assignLevel(className, level) {
+        if (visited.has(className)) return;
+        visited.add(className);
+
+        levels[className] = Math.max(levels[className] || 0, level);
+
+        // Recursively assign levels to children
+        const children = childrenMap[className] || [];
+        children.forEach(child => {
+            assignLevel(child, level + 1);
+        });
+    }
+
+    // Start from roots
+    roots.forEach(root => assignLevel(root.name, 0));
+
+    // Assign level 0 to any unvisited classes
+    classes.forEach(cls => {
+        if (!visited.has(cls.name)) {
+            levels[cls.name] = 0;
+        }
+    });
+
+    // Group classes by level
+    const levelGroups = {};
+    classes.forEach(cls => {
+        const level = levels[cls.name];
+        if (!levelGroups[level]) {
+            levelGroups[level] = [];
+        }
+        levelGroups[level].push(cls.name);
+    });
+
+    // Calculate positions
+    const positions = {};
+    Object.keys(levelGroups).forEach(level => {
+        const levelClasses = levelGroups[level];
+        levelClasses.forEach((className, index) => {
+            positions[className] = {
+                x: 10 + (index % columns) * horizontalSpacing,
+                y: 10 + parseInt(level) * verticalSpacing,
+                width: config.layout.defaultWidth,
+                height: config.layout.defaultHeight,
+            };
+        });
+    });
+
+    return positions;
+}
+
+/**
  * Generate XML for all relationships
  * @param {Array} relationships - Array of relationship objects
  * @param {Array} classes - Array of class metadata (for positions)
@@ -128,16 +217,13 @@ function calculateBoundingBox(points) {
 function generateRelationships(relationships, classes, config, startId) {
     const relationshipObjects = [];
 
-    // Build class position lookup
-    const classPositions = {};
+    // Build class position lookup using hierarchical layout
+    const classPositions = calculateHierarchicalPositions(classes, relationships, config);
     const classIds = {};
+
     classes.forEach((cls, index) => {
-        const position = config.layout.positions[cls.name] || {
-            x: 10 + (index % 3) * 15,
-            y: 10 + Math.floor(index / 3) * 15,
-            width: config.layout.defaultWidth,
-            height: config.layout.defaultHeight,
-        };
+        // Use hierarchical position or fall back to manual position
+        const position = config.layout.positions[cls.name] || classPositions[cls.name];
         classPositions[cls.name] = position;
         classIds[cls.name] = index; // Object ID for connections
     });
@@ -185,4 +271,5 @@ function generateRelationships(relationships, classes, config, startId) {
 module.exports = {
     calculateRoutingPath,
     generateRelationships,
+    calculateHierarchicalPositions,
 };
