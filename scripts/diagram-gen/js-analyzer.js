@@ -8,13 +8,121 @@ const path = require("path");
 const { parse } = require("@babel/parser");
 
 /**
- * Determine if a member name is private based on naming convention
- * Convention: Names starting with underscore (_) are considered private
+ * Determine if a member name is truly private (JavaScript private fields)
+ * Convention: Only names starting with # are considered private
+ * Underscore-prefixed names (_) are treated as regular public members
  * @param {string} name - Member name (property or method)
  * @returns {boolean} True if private, false if public
  */
 function isPrivateMember(name) {
-    return name.startsWith("_");
+    return name && typeof name === 'string' && name.startsWith("#");
+}
+
+/**
+ * Extract type information from JSDoc @type annotation
+ * @param {object} node - AST node that may have leading comments
+ * @returns {string|null} Type string from JSDoc or null if not found
+ */
+function extractJSDocType(node) {
+    if (!node.leadingComments || node.leadingComments.length === 0) {
+        return null;
+    }
+
+    // Look through all leading comments for JSDoc @type annotation
+    for (const comment of node.leadingComments) {
+        if (comment.type === "CommentBlock") {
+            // Match @type {TypeExpression} pattern
+            const typeMatch = comment.value.match(/@type\s*\{([^}]+)\}/);
+            if (typeMatch) {
+                return typeMatch[1].trim();
+            }
+        }
+    }
+
+    return null;
+}
+
+/**
+ * Extract parameter information from JSDoc @param annotations
+ * @param {object} node - AST node that may have leading comments
+ * @returns {Map<string, string>} Map of parameter names to their types
+ */
+function extractJSDocParams(node) {
+    const paramTypes = new Map();
+
+    if (!node.leadingComments || node.leadingComments.length === 0) {
+        return paramTypes;
+    }
+
+    // Look through all leading comments for JSDoc @param annotations
+    for (const comment of node.leadingComments) {
+        if (comment.type === "CommentBlock") {
+            // Match @param {Type} name pattern
+            const paramRegex = /@param\s*\{([^}]+)\}\s*(\w+)/g;
+            let match;
+            while ((match = paramRegex.exec(comment.value)) !== null) {
+                const type = match[1].trim();
+                const paramName = match[2].trim();
+                paramTypes.set(paramName, type);
+            }
+        }
+    }
+
+    return paramTypes;
+}
+
+/**
+ * Extract return type from JSDoc @returns or @return annotation
+ * @param {object} node - AST node that may have leading comments
+ * @returns {string|null} Return type string from JSDoc or null if not found
+ */
+function extractJSDocReturnType(node) {
+    if (!node.leadingComments || node.leadingComments.length === 0) {
+        return null;
+    }
+
+    for (const comment of node.leadingComments) {
+        if (comment.type === "CommentBlock") {
+            // Match @returns {Type} or @return {Type}
+            const returnMatch = comment.value.match(/@returns?\s*\{([^}]+)\}/);
+            if (returnMatch) {
+                return returnMatch[1].trim();
+            }
+        }
+    }
+
+    return null;
+}
+
+/**
+ * Extract description text from JSDoc (text before first @ tag)
+ * @param {object} node - AST node that may have leading comments
+ * @returns {string|null} Description text or null if not found
+ */
+function extractJSDocDescription(node) {
+    if (!node.leadingComments || node.leadingComments.length === 0) {
+        return null;
+    }
+
+    for (const comment of node.leadingComments) {
+        if (comment.type === "CommentBlock") {
+            // Extract text before first @ tag
+            // Remove leading/trailing whitespace and asterisks
+            const descMatch = comment.value.match(/^\s*\*?\s*([\s\S]*?)(?=@|$)/);
+            if (descMatch) {
+                const description = descMatch[1]
+                    .split('\n')
+                    .map(line => line.replace(/^\s*\*\s?/, '').trim())
+                    .filter(line => line.length > 0)
+                    .join(' ')
+                    .trim();
+
+                return description.length > 0 ? description : null;
+            }
+        }
+    }
+
+    return null;
 }
 
 /**
@@ -79,7 +187,7 @@ function analyzeFile(content, filename, config) {
     try {
         const ast = parse(content, {
             sourceType: "module",
-            plugins: ["classProperties"],
+            plugins: ["classProperties", "classPrivateProperties", "classPrivateMethods"],
         });
 
         const classes = [];
@@ -109,16 +217,75 @@ function analyzeFile(content, filename, config) {
 }
 
 /**
- * Extract top-level functions and create a pseudo-class for files without classes
+ * Extract properties from an array of object literals
+ * @param {object} arrayNode - AST ArrayExpression node
+ * @returns {Array} Array of property metadata
+ */
+function extractPropertiesFromArrayLiteral(arrayNode) {
+    const properties = [];
+    const propertyKeys = new Set();
+
+    // Collect all unique keys from objects in the array
+    for (const element of arrayNode.elements) {
+        if (element && element.type === "ObjectExpression") {
+            for (const prop of element.properties) {
+                if (prop.type === "ObjectProperty" && prop.key.type === "Identifier") {
+                    propertyKeys.add(prop.key.name);
+                }
+            }
+        }
+    }
+
+    // Create property entries
+    for (const key of propertyKeys) {
+        properties.push({
+            name: key,
+            type: "unknown", // Could try to infer from first element
+            visibility: "public",
+            source: "constant-array",
+            comment: null,
+        });
+    }
+
+    return properties;
+}
+
+/**
+ * Extract properties from an object literal
+ * @param {object} objectNode - AST ObjectExpression node
+ * @returns {Array} Array of property metadata
+ */
+function extractPropertiesFromObjectLiteral(objectNode) {
+    const properties = [];
+
+    for (const prop of objectNode.properties) {
+        if (prop.type === "ObjectProperty" && prop.key.type === "Identifier") {
+            const propType = inferType(prop.value);
+            properties.push({
+                name: prop.key.name,
+                type: propType,
+                visibility: "public",
+                source: "constant-object",
+                comment: null,
+            });
+        }
+    }
+
+    return properties;
+}
+
+/**
+ * Extract top-level functions and constants, creating a pseudo-class for files without classes
  * @param {object} ast - Babel AST
  * @param {string} filename - Name of the file (will be used as pseudo-class name)
  * @param {object} config - Configuration options
- * @returns {object|null} Pseudo-class metadata or null if no functions found
+ * @returns {object|null} Pseudo-class metadata or null if no functions/constants found
  */
 function extractFunctionsAsPseudoClass(ast, filename, config) {
     const methods = [];
+    const properties = [];
 
-    // Traverse AST to find top-level functions
+    // Traverse AST to find top-level functions and exported constants
     for (const node of ast.program.body) {
         let functionNode = null;
         let functionName = null;
@@ -146,6 +313,7 @@ function extractFunctionsAsPseudoClass(ast, filename, config) {
             }
         }
         // Exported variable with function: export const foo = () => {}
+        // Also handle exported constants (arrays/objects): export const foo = [...]
         else if (node.type === "ExportNamedDeclaration" && node.declaration?.type === "VariableDeclaration") {
             for (const declarator of node.declaration.declarations) {
                 if (declarator.init &&
@@ -153,6 +321,38 @@ function extractFunctionsAsPseudoClass(ast, filename, config) {
                      declarator.init.type === "ArrowFunctionExpression")) {
                     functionNode = declarator.init;
                     functionName = declarator.id.name;
+                    break;
+                } else if (declarator.init &&
+                          (declarator.init.type === "ArrayExpression" ||
+                           declarator.init.type === "ObjectExpression")) {
+                    // Handle exported constant arrays/objects
+                    const constantName = declarator.id.name;
+                    const jsDocType = extractJSDocType(node) || extractJSDocType(declarator);
+                    const jsDocDesc = extractJSDocDescription(node) || extractJSDocDescription(declarator);
+
+                    let constantProps = [];
+                    if (declarator.init.type === "ArrayExpression") {
+                        constantProps = extractPropertiesFromArrayLiteral(declarator.init);
+                    } else if (declarator.init.type === "ObjectExpression") {
+                        constantProps = extractPropertiesFromObjectLiteral(declarator.init);
+                    }
+
+                    // Add a special "property" representing the constant itself
+                    properties.push({
+                        name: constantName,
+                        type: jsDocType || (declarator.init.type === "ArrayExpression" ? "Array" : "Object"),
+                        visibility: "public",
+                        source: "constant",
+                        comment: jsDocDesc,
+                    });
+
+                    // Add the structure properties with a prefix
+                    constantProps.forEach(prop => {
+                        properties.push({
+                            ...prop,
+                            name: `  ${prop.name}`, // Indent to show hierarchy
+                        });
+                    });
                     break;
                 }
             }
@@ -165,28 +365,35 @@ function extractFunctionsAsPseudoClass(ast, filename, config) {
             // Apply filtering based on config
             if (isPrivate && !config.methods.includePrivate) continue;
 
+            // Extract return type and description from JSDoc
+            const returnType = extractJSDocReturnType(functionNode);
+            const functionDescription = extractJSDocDescription(functionNode);
+
             methods.push({
                 name: functionName,
                 visibility: isPrivate ? "private" : "public",
                 params: functionNode.params ? functionNode.params.length : 0,
                 source: "function",
+                returnType: returnType,
+                comment: functionDescription,
             });
         }
     }
 
-    // If no functions found, don't create a pseudo-class
-    if (methods.length === 0) {
+    // If no functions or constants found, don't create a pseudo-class
+    if (methods.length === 0 && properties.length === 0) {
         return null;
     }
 
     // Apply method filtering and limits
     const filteredMethods = filterMethods(methods, config.methods);
+    const filteredProps = filterProperties(properties, config.properties);
 
     // Create pseudo-class with filename as class name
     return {
         name: filename, // Use filename including .js extension
         filename,
-        properties: [], // No properties for function modules
+        properties: filteredProps,
         methods: filteredMethods,
         superClass: null, // No inheritance for pseudo-classes
     };
@@ -206,10 +413,15 @@ function extractClassInfo(classNode, filename, config) {
 
     // Extract constructor properties and methods from class body
     for (const member of classNode.body.body) {
-        if (member.type === "ClassMethod") {
-            if (member.key.name === "constructor") {
+        if (member.type === "ClassMethod" || member.type === "ClassPrivateMethod") {
+            if (member.key.name === "constructor" || (member.key.type === "Identifier" && member.key.name === "constructor")) {
                 // Extract properties assigned in constructor
                 extractConstructorProperties(member, properties, config.properties);
+                // Also extract constructor as a method
+                const constructorInfo = extractMethod(member, config.methods);
+                if (constructorInfo) {
+                    methods.push(constructorInfo);
+                }
             } else if (member.kind === "get" && config.properties.includeGetters) {
                 // Getter - treat as a property when includeGetters is true in properties config
                 const propInfo = extractGetter(member, config.properties);
@@ -223,14 +435,14 @@ function extractClassInfo(classNode, filename, config) {
                     methods.push(methodInfo);
                 }
             } else {
-                // Regular method
+                // Regular method (public or private)
                 const methodInfo = extractMethod(member, config.methods);
                 if (methodInfo) {
                     methods.push(methodInfo);
                 }
             }
-        } else if (member.type === "ClassProperty") {
-            // Class field
+        } else if (member.type === "ClassProperty" || member.type === "ClassPrivateProperty") {
+            // Class field (public or private)
             const propInfo = extractProperty(member, config.properties);
             if (propInfo) {
                 properties.push(propInfo);
@@ -238,9 +450,29 @@ function extractClassInfo(classNode, filename, config) {
         }
     }
 
+    // Deduplicate properties by name (keep first occurrence)
+    const seenProps = new Map();
+    const uniqueProperties = [];
+    for (const prop of properties) {
+        if (!seenProps.has(prop.name)) {
+            seenProps.set(prop.name, true);
+            uniqueProperties.push(prop);
+        }
+    }
+
+    // Deduplicate methods by name (keep first occurrence)
+    const seenMethods = new Map();
+    const uniqueMethods = [];
+    for (const method of methods) {
+        if (!seenMethods.has(method.name)) {
+            seenMethods.set(method.name, true);
+            uniqueMethods.push(method);
+        }
+    }
+
     // Apply filtering and limits
-    const filteredProps = filterProperties(properties, config.properties);
-    const filteredMethods = filterMethods(methods, config.methods);
+    const filteredProps = filterProperties(uniqueProperties, config.properties);
+    const filteredMethods = filterMethods(uniqueMethods, config.methods);
 
     return {
         name: className,
@@ -309,17 +541,40 @@ function extractConstructorProperties(constructorNode, properties, propConfig) {
             statement.expression.left.type === "MemberExpression" &&
             statement.expression.left.object.type === "ThisExpression") {
 
-            const propName = statement.expression.left.property.name;
+            // Handle both regular properties and private properties (#field)
+            let propName;
+            const property = statement.expression.left.property;
+            if (property.type === "PrivateName") {
+                // Private field: this.#fieldName
+                if (property.id && property.id.name) {
+                    propName = "#" + property.id.name;
+                } else {
+                    continue; // Skip if name is missing
+                }
+            } else if (property.name) {
+                propName = property.name;
+            } else {
+                continue; // Skip if name is missing
+            }
+
             const isPrivate = isPrivateMember(propName);
 
             // Apply filtering based on config
             if (isPrivate && !propConfig.includePrivate) continue;
 
             const rightSide = statement.expression.right;
-            const propType = inferType(rightSide);
 
-            // Detect potential composition relationships
-            const compositionTarget = detectCompositionType(propName, rightSide);
+            // Try to get type from JSDoc first, fallback to inference
+            let propType = extractJSDocType(statement);
+            if (!propType) {
+                propType = inferType(rightSide);
+            }
+
+            // Try to get description from JSDoc
+            let propDescription = extractJSDocDescription(statement);
+
+            // Detect potential composition relationships (skip for private fields with #)
+            const compositionTarget = propName.startsWith("#") ? null : detectCompositionType(propName, rightSide);
 
             properties.push({
                 name: propName,
@@ -327,6 +582,7 @@ function extractConstructorProperties(constructorNode, properties, propConfig) {
                 visibility: isPrivate ? "private" : "public",
                 source: "constructor",
                 compositionTarget: compositionTarget, // Class name if this is a composition, null otherwise
+                comment: propDescription,
             });
         }
     }
@@ -343,7 +599,21 @@ function extractConstructorProperties(constructorNode, properties, propConfig) {
  * @returns {object|null} Method metadata or null if filtered
  */
 function extractMethod(methodNode, methodConfig) {
-    const methodName = methodNode.key.name;
+    // Handle both regular methods and private methods (#method)
+    let methodName;
+    if (methodNode.key.type === "PrivateName") {
+        // Private method: #methodName - the id contains the name without #
+        if (methodNode.key.id && methodNode.key.id.name) {
+            methodName = "#" + methodNode.key.id.name;
+        } else {
+            return null; // Skip if name is missing
+        }
+    } else if (methodNode.key.name) {
+        methodName = methodNode.key.name;
+    } else {
+        return null; // Skip if name is missing
+    }
+
     const isPrivate = isPrivateMember(methodName);
     const isGetter = methodNode.kind === "get";
     const isSetter = methodNode.kind === "set";
@@ -353,11 +623,45 @@ function extractMethod(methodNode, methodConfig) {
     if (isGetter && !methodConfig.includeGetters) return null;
     if (isSetter && !methodConfig.includeSetters) return null;
 
+    // Extract parameter types from JSDoc
+    const jsDocParamTypes = extractJSDocParams(methodNode);
+
+    // Extract return type and description from JSDoc
+    const returnType = extractJSDocReturnType(methodNode);
+    const methodDescription = extractJSDocDescription(methodNode);
+
+    // Build parameter list with types
+    const parameters = methodNode.params.map(param => {
+        let paramName = "unknown";
+
+        // Extract parameter name from various AST node types
+        if (param.type === "Identifier") {
+            paramName = param.name;
+        } else if (param.type === "AssignmentPattern" && param.left.type === "Identifier") {
+            // Default parameter: param = defaultValue
+            paramName = param.left.name;
+        } else if (param.type === "RestElement" && param.argument.type === "Identifier") {
+            // Rest parameter: ...param
+            paramName = "..." + param.argument.name;
+        }
+
+        // Get type from JSDoc or default to unknown
+        const paramType = jsDocParamTypes.get(paramName.replace("...", "")) || "unknown";
+
+        return {
+            name: paramName,
+            type: paramType
+        };
+    });
+
     return {
         name: methodName,
         kind: methodNode.kind, // "method", "get", or "set"
         visibility: isPrivate ? "private" : "public",
         params: methodNode.params.length,
+        parameters: parameters, // Array of {name, type} objects
+        returnType: returnType,
+        comment: methodDescription,
     };
 }
 
@@ -368,16 +672,40 @@ function extractMethod(methodNode, methodConfig) {
  * @returns {object|null} Property metadata or null if filtered
  */
 function extractProperty(propNode, propConfig) {
-    const propName = propNode.key.name;
+    // Handle both regular properties and private properties (#field)
+    let propName;
+    if (propNode.key.type === "PrivateName") {
+        // Private field: #fieldName - the id contains the name without #
+        if (propNode.key.id && propNode.key.id.name) {
+            propName = "#" + propNode.key.id.name;
+        } else {
+            return null; // Skip if name is missing
+        }
+    } else if (propNode.key.name) {
+        propName = propNode.key.name;
+    } else {
+        return null; // Skip if name is missing
+    }
+
     const isPrivate = isPrivateMember(propName);
 
     if (isPrivate && !propConfig.includePrivate) return null;
 
+    // Try to get type from JSDoc first, fallback to inference
+    let propType = extractJSDocType(propNode);
+    if (!propType) {
+        propType = propNode.value ? inferType(propNode.value) : "unknown";
+    }
+
+    // Try to get description from JSDoc
+    let propDescription = extractJSDocDescription(propNode);
+
     return {
         name: propName,
-        type: propNode.value ? inferType(propNode.value) : "unknown",
+        type: propType,
         visibility: isPrivate ? "private" : "public",
         source: "field",
+        comment: propDescription,
     };
 }
 
@@ -388,16 +716,44 @@ function extractProperty(propNode, propConfig) {
  * @returns {object|null} Property metadata or null if filtered
  */
 function extractGetter(getterNode, propConfig) {
-    const propName = getterNode.key.name;
+    // Handle both regular getters and private getters (#getter)
+    let propName;
+    if (getterNode.key.type === "PrivateName") {
+        // Private getter: #propName - the id contains the name without #
+        if (getterNode.key.id && getterNode.key.id.name) {
+            propName = "#" + getterNode.key.id.name;
+        } else {
+            return null; // Skip if name is missing
+        }
+    } else if (getterNode.key.name) {
+        propName = getterNode.key.name;
+    } else {
+        return null; // Skip if name is missing
+    }
+
     const isPrivate = isPrivateMember(propName);
 
     if (isPrivate && !propConfig.includePrivate) return null;
 
+    // Try to get type from JSDoc - getters use @returns since they're methods that return values
+    let propType = extractJSDocReturnType(getterNode);
+    if (!propType) {
+        // Fallback to @type in case it was documented as a property
+        propType = extractJSDocType(getterNode);
+    }
+    if (!propType) {
+        propType = "unknown"; // Could try to infer from return statement in future
+    }
+
+    // Try to get description from JSDoc
+    let propDescription = extractJSDocDescription(getterNode);
+
     return {
         name: propName,
-        type: "unknown", // Could try to infer from return statement in future
+        type: propType,
         visibility: isPrivate ? "private" : "public",
         source: "getter",
+        comment: propDescription,
     };
 }
 

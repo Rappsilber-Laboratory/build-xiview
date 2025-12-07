@@ -16,7 +16,7 @@ module.exports = {
 
     // Property filtering options
     properties: {
-        includePrivate: true,          // Include properties starting with _
+        includePrivate: true,          // Include private properties (#field) - underscore prefix (_field) treated as public
         includeGetters: true,           // Include getters as properties (recommended: true)
                                         // When true: getters appear in properties section as "propName: type"
                                         // When false: getters can appear in methods section (if methods.includeGetters is true)
@@ -26,10 +26,10 @@ module.exports = {
 
     // Method filtering options
     methods: {
-        includePrivate: false,          // Include methods starting with _
-        includeGetters: false,          // Include getter methods as operations (only relevant if properties.includeGetters is false)
+        includePrivate: true,          // Include private methods (#method) - underscore prefix (_method) treated as public
+        includeGetters: true,          // Include getter methods as operations (only relevant if properties.includeGetters is false)
                                         // Recommended: false (let properties.includeGetters handle getters instead)
-        includeSetters: false,          // Include setter methods (set propName())
+        includeSetters: true,          // Include setter methods (set propName())
         excludePatterns: [],            // Regex patterns to exclude
         maxMethods: 15,                 // Limit number of methods per class
     },
