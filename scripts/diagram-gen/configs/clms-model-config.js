@@ -5,8 +5,8 @@
 
 module.exports = {
     // Source and output paths
-    sourceDir: "./CLMS-model/js",
-    outputFile: "./CLMS-model/clms-model-diagram.dia",
+    sourceDir: "./CLMS-model/js/models/mzidentml-metadata",
+    outputFile: "./CLMS-model/js/models/mzidentml-metadata/mzidentml-metadata.dia",
 
     // Which classes to include
     classes: {
