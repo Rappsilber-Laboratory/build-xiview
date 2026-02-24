@@ -1,12 +1,16 @@
 [submodule "xiview"]
 	path = xiview
 	url = https://github.com/Rappsilber-Laboratory/xiview.git
+	branch = v2
 [submodule "CLMS-model"]
 	path = CLMS-model
 	url = https://github.com/Rappsilber-Laboratory/CLMS-model.git
+	branch = v2
 [submodule "spectrum"]
 	path = spectrum
 	url = https://github.com/Rappsilber-Laboratory/xiSPEC_spectrumViewer.git
+	branch = dev
 [submodule "crosslink-viewer"]
 	path = crosslink-viewer
 	url = https://github.com/Rappsilber-Laboratory/crosslink-viewer.git
+	branch = master

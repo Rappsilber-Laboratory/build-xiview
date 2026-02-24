@@ -1,6 +1,6 @@
 {
   "name": "xiview",
-  "version": "2.0.0a10",
+  "version": "2.0.0a11",
   "description": "visualisation of crosslinking  mass spectrometry data",
   "keywords": [
     "xiVIEW",
@@ -56,7 +56,7 @@
     "build-prod": "rm -rf dist && webpack --mode production --config webpack.prod.js;",
     "copy-to-xiview-server": "cp dist/* ../xiview-server/static/ ;",
     "build-dev-and-copy-to-xiview-server": "npm run build-dev && npm run copy-to-xiview-server;",
-    "build-prod-and-copy-to-xiview-server": "npm run build-prod && npm run copy-to-xiview-server;",
+    "build-prod-and-copy-to-xiview-server": "rm -rf dist && npm run build-prod && npm run copy-to-xiview-server;",
     "all-dev": "npm run lint && npm run build-dev && npm run test && npm run copy-to-xiview-server;"
   },
   "dependencies": {
@@ -85,12 +85,10 @@
     "babel-loader": "^9.1.2",
     "css-loader": "^7.1.4",
     "eslint": "^10.0.0",
-    "file-loader": "^6.2.0",
-    "jsdom": "^22.1.0",
+    "jsdom": "^26.1.0",
     "puppeteer": "^24.0.0",
     "qunit": "2.21.1",
     "style-loader": "^3.3.2",
-    "url-loader": "^0.5.9",
     "webpack": "^5.104.1",
     "webpack-cli": "^5.0.2",
     "webpack-merge": "^5.8.0",
@@ -98,6 +96,6 @@
     "xmlbuilder2": "^4.0.0"
   },
   "engines": {
-    "node": ">=20.12.1 "
+    "node": ">=24.13.1"
   }
 }
